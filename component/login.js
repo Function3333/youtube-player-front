@@ -1,15 +1,29 @@
 import { Box, Heading, VStack, FormControl, Link, Input, HStack, Text, Center, Button } from 'native-base';
-import { TextInput , StyleSheet, Alert} from 'react-native';
+import { StyleSheet, Alert} from 'react-native';
 import { useState } from 'react';
-import formValidator from '../utils/formValidator';
+import api from '../utils/api';
 
 const login = () => {
     const[email, setEmail] = useState("");
     const[password, setPassword] = useState("");
 
     const validateform = () => {
-      if(email.length === 0) Alert.alert("이메일은 필수 값입니다.");
-      if(password.length === 0) Alert.alert("비밀번호는 필수 값입니다.");
+      const emailLength = email.length;
+      const passwordLength = password.length;
+      
+      if(emailLength === 0) Alert.alert("이메일은 필수 값입니다.");
+      if(passwordLength === 0) Alert.alert("비밀번호는 필수 값입니다.");
+      
+      if(emailLength > 0 && passwordLength > 0) {
+        const testApi = new api();
+        const param = {
+          "name" : email,
+          "password" : password
+        }
+        
+        const result = testApi.doPost("/user/login", param);
+        Alert.alert("Request Response", result);
+      }
     }
 
     return (

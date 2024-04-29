@@ -4,25 +4,25 @@ import { useState } from 'react';
 import api from '../utils/api';
 
 const login = () => {
-    const[email, setEmail] = useState("");
+    const[username, setUsername] = useState("");
     const[password, setPassword] = useState("");
 
-    const validateform = () => {
-      const emailLength = email.length;
+    const validateform = async () => {
+      const usernameLength = username.length;
       const passwordLength = password.length;
       
-      if(emailLength === 0) Alert.alert("이메일은 필수 값입니다.");
+      if(usernameLength === 0) Alert.alert("이메일은 필수 값입니다.");
       if(passwordLength === 0) Alert.alert("비밀번호는 필수 값입니다.");
       
-      if(emailLength > 0 && passwordLength > 0) {
-        const testApi = new api();
+      if(usernameLength > 0 && passwordLength > 0) {
+        const loginApi = new api();
         const param = {
-          "name" : email,
+          "name" : username,
           "password" : password
         }
         
-        const result = testApi.doPost("/user/login", param);
-        Alert.alert("Request Response", result);
+        const response = await loginApi.doPost("/user/login", param);
+        console.log(`Request Response : ${JSON.stringify(response)}`); 
       }
     }
 
@@ -37,11 +37,11 @@ const login = () => {
 
           <VStack space={3} mt="5">
             <FormControl>
-              <FormControl.Label>Email</FormControl.Label>
+              <FormControl.Label>Username</FormControl.Label>
               <Input 
                 style={styles.inputText} 
                 autoCapitalize={"none"}
-                onChangeText={setEmail}
+                onChangeText={setUsername}
               />
             </FormControl>
             <FormControl>

@@ -7,6 +7,16 @@ class formValidator {
     validatePassword(password) {
         return password.length >= 10;
     }
+    
+    validateUsername(username) {
+        const regex = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{1,16})$/;
+        return regex.test(username);
+    }
+
+    validatePassword(password) {
+        const regex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[\W_])([a-zA-Z0-9\W_]{1,20})$/;
+        return regex.test(password);
+    }
 }
 
 export default formValidator;

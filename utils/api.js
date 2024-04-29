@@ -6,12 +6,12 @@ class api {
         this.port = "8080";
     }
 
-    async doPost(url , params) {
+    doPost(url , params) {
         const requestUrl = `http://${this.host}:${this.port}${url}`;    
         console.log(`Request URL : ${requestUrl}`);
         
         try {    
-            const reuslt = await axios.post(requestUrl, params);
+            const reuslt = axios.post(requestUrl, params);
             return reuslt;
         } catch (error) {
             console.log(error);
@@ -19,7 +19,18 @@ class api {
         }
     }
 
-    doGet(url , params) {}
+    doGet(url , params) {
+        const requestUrl = `http://${this.host}:${this.port}${url}`;
+        console.log(`Request URL : ${requestUrl}`);
+
+        try {    
+            const reuslt = axios.get(requestUrl, {params : params});
+            return reuslt;
+        } catch (error) {
+            console.log(error);
+            return error.response;
+        }
+    }
 }
 
 export default api;

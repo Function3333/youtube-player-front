@@ -18,7 +18,6 @@ const signUp = () => {
         const params = {
             "username" : username
         }
-
         const response = signUpApi.doGet(url, params);
     }
 

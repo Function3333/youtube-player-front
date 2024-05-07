@@ -1,0 +1,13 @@
+{
+    "FormatError.username" : "16자 이하 영문과 숫자 조합만 가능합니다.",
+    "FormatError.email" : "올바른 이메일 형식이 아닙니다.",
+    "FormatError.password" : "16자 이하 영문과 숫자 조합만 가능합니다.",
+    "VerifyError.username" : "이미 존재하는 회원명입니다." ,
+    "VerifyError.email" : "이미 존재하는 이메일입니다.",
+
+    "EmptyError.username" : "회원명을 입력해주세요",
+    "EmptyError.password" : "비밀번호를 입력해주세요",
+
+    "VerifySuccess.username" : "사용 가능한 회원명입니다.",
+    "VerifySuccess.email" : "사용 가능한 이메일입니다."
+}

@@ -1,9 +1,10 @@
-import { Box, Heading, VStack, FormControl, Link, Input, HStack, Text, Center, Button } from 'native-base';
+import { Box, Heading, VStack, FormControl, Input, HStack, Text, Center, Button, View ,Link} from 'native-base';
 import { StyleSheet, Alert} from 'react-native';
 import { useState } from 'react';
-import api from '../utils/api';
+import outputMessages from '../utils/outputMessages.json'
+import api from '../utils/Api';
 
-const login = () => {
+const Login = ({navigation}) => {
     const[username, setUsername] = useState("");
     const[password, setPassword] = useState("");
 
@@ -11,8 +12,8 @@ const login = () => {
       const usernameLength = username.length;
       const passwordLength = password.length;
       
-      if(usernameLength === 0) Alert.alert("이메일은 필수 값입니다.");
-      if(passwordLength === 0) Alert.alert("비밀번호는 필수 값입니다.");
+      if(usernameLength === 0) Alert.alert(outputMessages['EmptyError.username']);
+      if(passwordLength === 0) Alert.alert(outputMessages['EmptyError.password']);
       
       if(usernameLength > 0 && passwordLength > 0) {
         const loginApi = new api();
@@ -27,7 +28,8 @@ const login = () => {
     }
 
     return (
-    <Center w="100%">
+    <View style={styles.container}>
+      <Center w="100%">
         <Box safeArea p="2" py="8" w="90%" maxW="290">
           <Center>
             <Heading size="lg" fontWeight="600" color="#FAFAD2">
@@ -51,15 +53,15 @@ const login = () => {
                 style={styles.inputText} 
                 autoCapitalize={"none"}
                 onChangeText={setPassword}
-                />
-              <Link _text={{
+              />
+              {/* <Link style={{
                             fontSize: "xs",
                             fontWeight: "500",
                             color: "indigo.500"
                           }} 
-              alignSelf="flex-end" mt="1">
+              alignSelf="flex-end" mt="1" to={{}}>
                 Forget Password?
-              </Link>
+              </Link> */}
             </FormControl>
 
             <Button 
@@ -72,23 +74,33 @@ const login = () => {
             <HStack mt="6" justifyContent="center">
               
               <Text fontSize="sm" color="coolGray.600" _dark={{color: "warmGray.200"}}>
-                I'm a new user.{" "}
+                회원이 아니신가요?.{" "}
               </Text>
               
-              <Link _text={{color: "indigo.500",fontWeight: "medium",fontSize: "sm"}} href="#">
-                Sign Up
+              <Link 
+                _text={{color: "indigo.500",fontWeight: "medium",fontSize: "sm"}} 
+                onPress={() => navigation.navigate("SiginUp")}
+                to={{screen : "SiginUp"}}
+              >
+                Click!
               </Link>
             </HStack>
           </VStack>
         </Box>
       </Center>
+    </View>
     );
   };
 
   const styles = StyleSheet.create({
     inputText : {
       color : "white"
-    } 
-  })
-
-  export default login;
+    },
+    container: {
+      flex: 1,
+      backgroundColor: '#000000',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+  export default Login;

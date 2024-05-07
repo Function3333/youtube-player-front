@@ -1,6 +1,6 @@
 import axios from "axios";
 
-class api {
+class Api {
     constructor() {
         this.host = "192.168.0.139";
         this.port = "8080";
@@ -33,4 +33,4 @@ class api {
     }
 }
 
-export default api;
+export default Api;

@@ -1,13 +1,19 @@
 {
     "FormatError.username" : "16자 이하 영문과 숫자 조합만 가능합니다.",
     "FormatError.email" : "올바른 이메일 형식이 아닙니다.",
-    "FormatError.password" : "16자 이하 영문과 숫자 조합만 가능합니다.",
-    "VerifyError.username" : "이미 존재하는 회원명입니다." ,
-    "VerifyError.email" : "이미 존재하는 이메일입니다.",
-
+    "FormatError.password" : "16자 이하 영문,숫자,특수문자를 조합해야합니다.",
+    
     "EmptyError.username" : "회원명을 입력해주세요",
     "EmptyError.password" : "비밀번호를 입력해주세요",
 
     "VerifySuccess.username" : "사용 가능한 회원명입니다.",
-    "VerifySuccess.email" : "사용 가능한 이메일입니다."
+    "VerifySuccess.email" : "사용 가능한 이메일입니다.",
+    "VerifyError.email" : "이메일 인증에 실패하였습니다.",
+
+    "DuplicateError.username" : "이미 사용중인 회원명입니다.",
+    "DuplicateError.email" : "이미 사용중인 이메일입니다.",
+
+    "SendSuccess.email" : "인증번호가 전송되었습니다",
+    "SendError.email.title" : "인증번호 전송에 실패하였습니다.",
+    "SendError.email.content" : "잠시 후 다시 시도해 주세요."
 }

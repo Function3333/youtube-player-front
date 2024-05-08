@@ -6,16 +6,19 @@ import formValidator from '../utils/formValidator';
 import apiResponse from '../enums/apiResponse';
 import outputMessages from '../utils/outputMessages.json';
 
-const SignUp = ({navigation}) => {
+const SignUp = ({navigation, route}) => {
     const [username, setUsername] = useState("");
     const [usernameErrorMsg, setUsernameErrorMsg] = useState("");
     const [usernameFlag, setUsernameFlag] = useState(false);
+
     const [email, setEmail] = useState("");
     const [emailErrorMsg, setEmailErrorMsg] = useState("");
-    const [emailFlag, setEmailFlag] = useState(false);
+    const verifyEmailResult = route.params?.verifyEmailResult ?? null;
+
     const [password, setPassword] = useState("");
     const [passwordErrorMsg, setPasswordErrorMsg] = useState("");
     const [passwordFlag, setpasswordFlag] = useState(false);
+
     const api = new Api();    
 
     useEffect(() => {
@@ -36,10 +39,17 @@ const SignUp = ({navigation}) => {
 
     useEffect(() => {
         const validator = new formValidator();
-        let result = validator.validatePassword(email);
+        let result = validator.validatePassword(password);
         
-        if(result === false) setPasswordErrorMsg(outputMessages['FormatError.password']);
-        if(result === true) setPasswordErrorMsg("");
+        if(result === false) {
+          setPasswordErrorMsg(outputMessages['FormatError.password']);
+          setpasswordFlag(false);
+        } 
+
+        if(result === true) {
+          setPasswordErrorMsg("");
+          setpasswordFlag(true);
+        } 
     }, [password]);
 
     const isUsernameDuplicate = async () => {
@@ -58,8 +68,8 @@ const SignUp = ({navigation}) => {
           setUsernameFlag(true);
         }
         if(response.data.result === apiResponse.DUPLICATE_NAME) {
-          Alert.alert(outputMessages['VerifyError.username']);
-          setUsernameErrorMsg(outputMessages['VerifyError.username']);
+          Alert.alert(outputMessages['DuplicateError.username']);
+          setUsernameErrorMsg(outputMessages['DuplicateError.username']);
         }
         }
     }
@@ -70,6 +80,25 @@ const SignUp = ({navigation}) => {
       
       if(usernameFlag === true && emailReult === true) {
         navigation.navigate("VerifyEmail", { email: email});
+      }
+    }
+
+    const handleSignUp = () => {
+      console.log(`username flag : ${usernameFlag}, verifyEmail result : ${verifyEmailResult}, passoword flag : ${passwordFlag}`);
+      
+      if(usernameFlag === true && verifyEmailResult === apiResponse.SUCCESS && passwordFlag === true) {
+        console.log("send signup request");
+        const url = "/user";
+        const params = {
+          "username" : username,
+          "email" : email,
+          "password" : password
+        };
+
+        const response = api.doPost(url, params);
+        response.then((response) => {
+          console.log(JSON.stringify(response));
+        });
       }
     }
 
@@ -157,9 +186,9 @@ const SignUp = ({navigation}) => {
               <Button 
                 mt="2" 
                 color="#808080"
-              //   onPress={validateform}
+                onPress={handleSignUp}
               >
-                Sign in
+                회원가입
               </Button>
             </VStack>
           </Box>

@@ -3,6 +3,7 @@ import { StyleSheet, Alert} from 'react-native';
 import { useState , useEffect} from 'react';
 import Api from '../utils/Api';
 import apiResponse from '../enums/apiResponse';
+import outputMessages from '../utils/outputMessages.json'
 
 const TIME_LIMIT = 1800;
 
@@ -33,7 +34,6 @@ const VerifyEmail = ({navigation, route}) => {
 
     const handleVerifyEmail = () => {
         const url = "/login/verifyEmail";
-        console.log(`inputEmail : ${email}`);
         const params = {
             "email" : email
         }
@@ -42,14 +42,50 @@ const VerifyEmail = ({navigation, route}) => {
         response.then((response) => {
             const reuslt = response.data.result;
             if(reuslt === apiResponse.SUCCESS) {
-                Alert.alert("인증번호가 전송되었습니다");
+                Alert.alert(outputMessages['SendSuccess.email']);
                 setVerifyEmailClick(true);
             }
         });
     }
 
     const handleSubmitVerifyNumber = () => {
-        
+        const url = "/login/verifyEmail";
+        const params = {
+          "verifyNumber" : verifyNumber,
+          "inputEmail" : email
+        }
+
+        console.log(`verifyNumber : ${verifyNumber}`);
+        const response = api.doPost(url, params);
+        response.then((response) => {
+          const result = response.data.result;
+          
+          switch (result) {
+            case apiResponse.SUCCESS:
+              Alert.alert(
+                outputMessages['VerifySuccess.email'],  "",
+                [{ text: "OK", onPress : () => navigation.navigate("SiginUp", { "verifyEmailResult" : apiResponse.SUCCESS}) }]
+              );
+              break;
+
+            case apiResponse.DUPLICATE_EMAIL:
+              Alert.alert(
+                outputMessages['DuplicateError.email'],  "",
+                [{ text: "OK", onPress : () => navigation.navigate("SiginUp", { "verifyEmailResult" : apiResponse.DUPLICATE_EMAIL}) }]
+              );
+              break;
+
+            case apiResponse.VERIFY_EMAIL_FAIL:
+              Alert.alert(
+                outputMessages['VerifyError.email'], "",
+                [{ text: "OK", onPress : () => navigation.navigate("SiginUp", { "verifyEmailResult" : apiResponse.VERIFY_EMAIL_FAIL}) }]
+              );
+              break;
+
+            default:
+              break;
+          }
+        });
     }
 
     return (
@@ -93,6 +129,7 @@ const VerifyEmail = ({navigation, route}) => {
                 
               </FormControl>
               <Button 
+                onPress={handleSubmitVerifyNumber}
                 mt="2" 
                 color="#808080"
               >

@@ -2,7 +2,7 @@ import { Box, Heading, VStack, FormControl, Link, Input, HStack, Text, Center, B
 import { StyleSheet, Alert} from 'react-native';
 import { useState , useEffect} from 'react';
 import Api from '../utils/Api';
-import formValidator from '../utils/formValidator';
+import formValidator from '../utils/FormValidator';
 import apiResponse from '../enums/apiResponse';
 import outputMessages from '../utils/outputMessages.json';
 
@@ -83,11 +83,8 @@ const SignUp = ({navigation, route}) => {
       }
     }
 
-    const handleSignUp = () => {
-      console.log(`username flag : ${usernameFlag}, verifyEmail result : ${verifyEmailResult}, passoword flag : ${passwordFlag}`);
-      
+    const handleSignUp = () => {      
       if(usernameFlag === true && verifyEmailResult === apiResponse.SUCCESS && passwordFlag === true) {
-        console.log("send signup request");
         const url = "/user";
         const params = {
           "username" : username,
@@ -97,7 +94,21 @@ const SignUp = ({navigation, route}) => {
 
         const response = api.doPost(url, params);
         response.then((response) => {
-          console.log(JSON.stringify(response));
+          const result = response.data.result;
+          let title, content = null;
+
+          if(result === apiResponse.SUCCESS) {
+            title = outputMessages['SiginUpSuccess'];
+            content = "";
+          }            
+          if(result === apiResponse.FAIL) {
+            title = outputMessages['SiginUpError.title'];
+            content = outputMessages['SiginUpError.content'];              
+          }
+          Alert.alert(
+            title,  content,
+            [{ text: "OK", onPress : () => navigation.navigate("Login") }]
+          );
         });
       }
     }

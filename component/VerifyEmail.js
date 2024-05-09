@@ -5,7 +5,7 @@ import Api from '../utils/Api';
 import apiResponse from '../enums/apiResponse';
 import outputMessages from '../utils/outputMessages.json'
 
-const TIME_LIMIT = 1800;
+const TIME_LIMIT = 300;
 
 const VerifyEmail = ({navigation, route}) => {
     const [verifyNumber, setVerifyNumber] = useState("");
@@ -55,7 +55,6 @@ const VerifyEmail = ({navigation, route}) => {
           "inputEmail" : email
         }
 
-        console.log(`verifyNumber : ${verifyNumber}`);
         const response = api.doPost(url, params);
         response.then((response) => {
           const result = response.data.result;

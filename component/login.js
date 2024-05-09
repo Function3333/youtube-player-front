@@ -2,28 +2,48 @@ import { Box, Heading, VStack, FormControl, Input, HStack, Text, Center, Button,
 import { StyleSheet, Alert} from 'react-native';
 import { useState } from 'react';
 import outputMessages from '../utils/outputMessages.json'
-import api from '../utils/Api';
+import Api from '../utils/Api';
+import apiResponse from '../enums/apiResponse';
+import SecureStore from '../utils/SecureStore';
+
 
 const Login = ({navigation}) => {
     const[username, setUsername] = useState("");
     const[password, setPassword] = useState("");
+    const loginApi = new Api();
+    const secureStore = new SecureStore();
 
-    const validateform = async () => {
+    const validateform = () => {
       const usernameLength = username.length;
       const passwordLength = password.length;
+
+      if(usernameLength === 0 && passwordLength === 0 || usernameLength === 0) Alert.alert(outputMessages['EmptyError.username']);
+      if(usernameLength !== 0 && passwordLength === 0) Alert.alert(outputMessages['EmptyError.password']);
       
-      if(usernameLength === 0) Alert.alert(outputMessages['EmptyError.username']);
-      if(passwordLength === 0) Alert.alert(outputMessages['EmptyError.password']);
-      
-      if(usernameLength > 0 && passwordLength > 0) {
-        const loginApi = new api();
+      if(usernameLength > 0 && passwordLength > 0) {  
         const param = {
           "name" : username,
           "password" : password
         }
         
-        const response = await loginApi.doPost("/user/login", param);
-        console.log(`Request Response : ${JSON.stringify(response)}`); 
+        const response = loginApi.doPost("/user/login", param);
+        response.then((response) => {
+          const result = response.data.result;
+          
+          switch (result) {
+            case apiResponse.SUCCESS:
+              console.log(`response data : ${JSON.stringify(response.data)}`);
+              break;
+
+            case apiResponse.LOGIN_FAIL:
+              Alert.alert(outputMessages['LoginError']);
+              break;
+          
+            default:
+              break;
+          }
+          console.log(`result : ${JSON.stringify(result)}`); 
+        });
       }
     }
 

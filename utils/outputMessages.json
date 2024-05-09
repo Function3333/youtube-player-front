@@ -7,7 +7,7 @@
     "EmptyError.password" : "비밀번호를 입력해주세요",
 
     "VerifySuccess.username" : "사용 가능한 회원명입니다.",
-    "VerifySuccess.email" : "사용 가능한 이메일입니다.",
+    "VerifySuccess.email" : "이메일 인증에 성공하였습니다.",
     "VerifyError.email" : "이메일 인증에 실패하였습니다.",
 
     "DuplicateError.username" : "이미 사용중인 회원명입니다.",
@@ -15,5 +15,11 @@
 
     "SendSuccess.email" : "인증번호가 전송되었습니다",
     "SendError.email.title" : "인증번호 전송에 실패하였습니다.",
-    "SendError.email.content" : "잠시 후 다시 시도해 주세요."
+    "SendError.email.content" : "잠시 후 다시 시도해 주세요.",
+
+    "SiginUpError.title" : "회원가입에 실패하였습니다. ",
+    "SiginUpError.content" : "잠시 후 다시 시도해주세요 ",
+    "SiginUpSuccess" : "회원가입에 성공하였습니다.",
+
+    "LoginError" : "아이디 혹은 비밀번호가 일치하지 않습니다."
 }

@@ -9,6 +9,7 @@ class Api {
     doPost(url , params) {
         const requestUrl = `http://${this.host}:${this.port}${url}`;    
         console.log(`Request URL : ${requestUrl}`);
+        console.log(`Request Params : ${JSON.stringify(params)}`);
         
         try {    
             const reuslt = axios.post(requestUrl, params);
@@ -22,6 +23,7 @@ class Api {
     doGet(url , params) {
         const requestUrl = `http://${this.host}:${this.port}${url}`;
         console.log(`Request URL : ${requestUrl}`);
+        console.log(`Request Params : ${JSON.stringify(params)}`);
 
         try {    
             const reuslt = axios.get(requestUrl, {params : params});

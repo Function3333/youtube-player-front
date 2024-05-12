@@ -1,4 +1,5 @@
 import * as ExpoSecureStore from 'expo-secure-store';
+import api from './Api';
 
 class SecureStore {
 
@@ -8,6 +9,10 @@ class SecureStore {
 
     getValue(key) {
         return ExpoSecureStore.getItemAsync(key);
+    }
+
+    isAccessTokenExpired(accessToken) {
+        
     }
 }
 

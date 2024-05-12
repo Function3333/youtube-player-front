@@ -21,5 +21,10 @@
     "SiginUpError.content" : "잠시 후 다시 시도해주세요 ",
     "SiginUpSuccess" : "회원가입에 성공하였습니다.",
 
-    "LoginError" : "아이디 혹은 비밀번호가 일치하지 않습니다."
+    "LoginError" : "아이디 혹은 비밀번호가 일치하지 않습니다.",
+
+    "ServerError.title" : "일시적 오류가 발생하였습니다.",
+    "ServerError.content" : "잠시 후 다시 시도해 주세요"
+
+
 }

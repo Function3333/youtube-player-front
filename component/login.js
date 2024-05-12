@@ -5,6 +5,7 @@ import outputMessages from '../utils/outputMessages.json'
 import Api from '../utils/Api';
 import apiResponse from '../enums/apiResponse';
 import SecureStore from '../utils/SecureStore';
+import Token from '../utils/Token';
 
 
 const Login = ({navigation}) => {
@@ -13,7 +14,15 @@ const Login = ({navigation}) => {
     const loginApi = new Api();
     const secureStore = new SecureStore();
 
-    const validateform = () => {
+    const test = async () => {
+      const value = JSON.parse(await secureStore.getValue("token"));
+      const token = new Token(value.acccessTokenData, value.refreshTokenData);
+      
+      console.log(`test token : ${JSON.stringify(token)}`);
+      token.isTokenExpired();
+    }
+
+    const handleSignIn = () => {
       const usernameLength = username.length;
       const passwordLength = password.length;
 
@@ -28,11 +37,14 @@ const Login = ({navigation}) => {
         
         const response = loginApi.doPost("/user/login", param);
         response.then((response) => {
-          const result = response.data.result;
+          const responseResult = response.data.result;
           
-          switch (result) {
+          switch (responseResult) {
             case apiResponse.SUCCESS:
-              console.log(`response data : ${JSON.stringify(response.data)}`);
+              const responseData = JSON.parse(response.data.data);
+              const token = new Token(responseData.accessToken, responseData.refreshToken);
+
+              secureStore.save("token", JSON.stringify(token));
               break;
 
             case apiResponse.LOGIN_FAIL:
@@ -40,9 +52,9 @@ const Login = ({navigation}) => {
               break;
           
             default:
+              Alert.alert(outputMessages['ServerError.title'], outputMessages['ServerError.content']);
               break;
           }
-          console.log(`result : ${JSON.stringify(result)}`); 
         });
       }
     }
@@ -87,7 +99,7 @@ const Login = ({navigation}) => {
             <Button 
               mt="2" 
               color="#808080"
-              onPress={validateform}
+              onPress={handleSignIn}
             >
               Sign in
             </Button>
@@ -99,7 +111,8 @@ const Login = ({navigation}) => {
               
               <Link 
                 _text={{color: "indigo.500",fontWeight: "medium",fontSize: "sm"}} 
-                onPress={() => navigation.navigate("SiginUp")}
+                // onPress={() => navigation.navigate("SiginUp")}
+                onPress={() => test()}
                 to={{screen : "SiginUp"}}
               >
                 Click!

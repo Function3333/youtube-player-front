@@ -45,6 +45,7 @@ const Login = ({navigation}) => {
               const token = new Token(responseData.accessToken, responseData.refreshToken);
 
               secureStore.save("token", JSON.stringify(token));
+              //메인 페이지 navigate
               break;
 
             case apiResponse.LOGIN_FAIL:

@@ -49,6 +49,10 @@ class Token {
         return  result;
     }
 
+    isTokenValide() {
+        return (this.acccessTokenData !== null && this.refreshTokenData !== null);
+    }
+
     isAccessTokenExpired() {
         const expiredDate = moment(this.acccessTokenData.expiredDate, 'ddd MMM DD HH:mm:ss [KST] YYYY');
         const now = moment();

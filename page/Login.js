@@ -11,18 +11,11 @@ import Token from '../utils/Token';
 const Login = ({navigation}) => {
     const[username, setUsername] = useState("");
     const[password, setPassword] = useState("");
-    const loginApi = new Api();
-    const secureStore = new SecureStore();
-
-    const test = async () => {
-      const value = JSON.parse(await secureStore.getValue("token"));
-      const token = new Token(value.acccessTokenData, value.refreshTokenData);
-      
-      console.log(`test token : ${JSON.stringify(token)}`);
-      token.isTokenExpired();
-    }
 
     const handleSignIn = () => {
+      const loginApi = new Api();
+      const secureStore = new SecureStore();
+
       const usernameLength = username.length;
       const passwordLength = password.length;
 
@@ -35,8 +28,7 @@ const Login = ({navigation}) => {
           "password" : password
         }
         
-        const response = loginApi.doPost("/user/login", param);
-        response.then((response) => {
+        loginApi.doPost("/user/login", param).then((response) => {
           const responseResult = response.data.result;
           
           switch (responseResult) {
@@ -45,7 +37,7 @@ const Login = ({navigation}) => {
               const token = new Token(responseData.accessToken, responseData.refreshToken);
 
               secureStore.save("token", JSON.stringify(token));
-              //메인 페이지 navigate
+              navigation.navigate("Search");
               break;
 
             case apiResponse.LOGIN_FAIL:

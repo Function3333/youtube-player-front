@@ -1,5 +1,5 @@
 import * as ExpoSecureStore from 'expo-secure-store';
-import api from './Api';
+import Token from '../utils/Token';
 
 class SecureStore {
 
@@ -11,8 +11,9 @@ class SecureStore {
         return ExpoSecureStore.getItemAsync(key);
     }
 
-    isAccessTokenExpired(accessToken) {
-        
+    async getToken() {
+        const value = JSON.parse(await this.getValue("token"));
+        return new Token(value.acccessTokenData, value.refreshTokenData);
     }
 }
 

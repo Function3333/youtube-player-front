@@ -13,11 +13,11 @@ export default function App() {
   return (
     <NavigationContainer>
         <NativeBaseProvider>
-            {/* <Stack.Navigator initialRouteName="Login"> */}
-            <Stack.Navigator>              
-                {/* <Stack.Screen name = "Login" component={Login} options={{ title: HEADER_NAME }} /> */}
-                {/* <Stack.Screen name = "SiginUp" component={SignUp}/> */}
-                {/* <Stack.Screen name = "VerifyEmail" component={VerifyEmail}/> */}
+            <Stack.Navigator initialRouteName="Login">
+            {/* <Stack.Navigator> */}
+                <Stack.Screen name = "Login" component={Login} options={{ title: HEADER_NAME }} />
+                <Stack.Screen name = "SiginUp" component={SignUp}/>
+                <Stack.Screen name = "VerifyEmail" component={VerifyEmail}/>
                 <Stack.Screen name = "Search" component={Search}/>
             </Stack.Navigator>
         </NativeBaseProvider> 

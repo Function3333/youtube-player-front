@@ -36,34 +36,25 @@ class Api {
     }
 
     async doGet(url, params) {
-        this.setHeader().then(() => {
-            const requestUrl = `http://${this.host}:${this.port}${url}`;
-            console.log(`Request URL: ${requestUrl}`);
-            console.log(`Request Params: ${JSON.stringify(params)}`);
-        
-            const config = {
-              params: params,
-            };
-        
-            console.log(`this.accessTokenHeader : ${this.accessTokenHeader}`);
-            console.log(`this.refreshTokenHeader : ${this.refreshTokenHeader}`);
-            if (this.accessTokenHeader != null && this.refreshTokenHeader != null) {
-              config.headers = {
-                "ACCESS_TOKEN": this.accessTokenHeader,
-                "REFRESH_TOKEN": this.refreshTokenHeader,
-              };
-            }
-        
-            axios.get(requestUrl, config)
-              .then(response => {
-                return response;
-              })
-              .catch(error => {
-                console.log(error);
-                return error.response;
-              });
-        })
+      await this.setHeader();
+      
+      const requestUrl = `http://${this.host}:${this.port}${url}`;
+      console.log(`Request URL: ${requestUrl}`);
+      console.log(`Request Params: ${JSON.stringify(params)}`);
+  
+      const config = {
+        params: params,
+      };
+  
+      if (this.accessTokenHeader != null && this.refreshTokenHeader != null) {
+        config.headers = {
+          "ACCESS_TOKEN": this.accessTokenHeader,
+          "REFRESH_TOKEN": this.refreshTokenHeader,
+        };
       }
+  
+      return axios.get(requestUrl, config);
+    }
 }
 
 export default Api;

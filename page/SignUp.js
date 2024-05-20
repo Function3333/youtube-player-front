@@ -18,9 +18,7 @@ const SignUp = ({navigation, route}) => {
     const [password, setPassword] = useState("");
     const [passwordErrorMsg, setPasswordErrorMsg] = useState("");
     const [passwordFlag, setpasswordFlag] = useState(false);
-
-    const api = new Api();    
-
+    
     useEffect(() => {
         const validator = new formValidator();
         const result = validator.validateUsername(username);
@@ -53,6 +51,7 @@ const SignUp = ({navigation, route}) => {
     }, [password]);
 
     const isUsernameDuplicate = async () => {
+      const api = new Api();
       const validator = new formValidator();
 
       const result = validator.validateUsername(username);
@@ -84,6 +83,8 @@ const SignUp = ({navigation, route}) => {
     }
 
     const handleSignUp = () => {      
+      const api = new Api();
+
       if(usernameFlag === true && verifyEmailResult === apiResponse.SUCCESS && passwordFlag === true) {
         const url = "/user";
         const params = {

@@ -1,36 +1,132 @@
-import { View, Input, HStack, ScrollView, Icon } from 'native-base';
+import { View, Input, HStack, VStack, Icon, Box, Text, Pressable, Image, Spacer } from 'native-base';
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet } from 'react-native';
-import { useState } from 'react';
+import { SwipeListView } from 'react-native-swipe-list-view';
+import { Alert, StyleSheet } from 'react-native';
+import { useState, useEffect} from 'react';
 
 import Api from '../utils/Api';
-import SecureStore from '../utils/SecureStore';
+import outputMessages from '../utils/outputMessages.json';
 import AppBar from '../component/AppBar';
 import Footer from '../component/Footer';
-import SearchResult from './SearchResult';
-
-
+import SecureStore from '../utils/SecureStore';
 
 const Search = () => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchResult, setSearchResult] = useState([]);
+    const [listData, setListData] = useState([]);
+
+    //Start Render Search Result Logic
+    useEffect(() => {
+      const formattedData = searchResult.map((item, index) => ({
+        key : index.toString(),
+        id : item.id.videoId,
+        title : item.snippet.title,
+        channelTitle : item.snippet.channelTitle,
+        thumbnailUrl : item.snippet.thumbnails.high.url,
+      }));
+      setListData(formattedData);
+    }, [searchResult]);
+  
+    const onRowDidOpen = rowKey => {
+      console.log('This row opened', rowKey);
+    };
+
+    const renderItem = ({ item }) => (
+      <Box>
+        <Pressable onPress={() => console.log('You touched me')} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+          <Box pl="5" pr="5" py="2.5">
+            <HStack alignItems="center" space={4}>
+              <Image
+                size="80px"
+                source={{ uri: item.thumbnailUrl }}
+                alt={item.title}
+                borderRadius={0} // 이미지가 사각형이 되도록 설정
+              />
+              <VStack>
+                <Text
+                  color="white"
+                  _dark={{ color: 'warmGray.50' }}
+                  bold
+                  width="280px" // 텍스트 컴포넌트의 최대 너비 설정
+                  flexWrap="wrap" // 너비를 넘어갈 경우 줄 바꿈
+                  numberOfLines={2} // 최대 한 줄만 표시
+                  ellipsizeMode="tail" // 텍스트가 넘칠 경우 ...으로 표시
+                >
+                  {item.title}
+                </Text>
+                <Text color="white" _dark={{color: 'warmGray.200'}}>
+                  {item.channelTitle}    
+                </Text>
+              </VStack>
+              <Spacer />
+            </HStack>
+          </Box>
+        </Pressable>
+      </Box>
+    );
+    //End Render Search Result Logic
+
+    const addResult = (newResults) => {
+      setSearchResult((prevResults) => [...prevResults, ...newResults]);
+    };
+    
+    const onEndReached = async () => {
+      const api = new Api();
+      const secureStore = new SecureStore();
+      const nextPageToken = await secureStore.getNextPageToken();
+
+      console.log(`[Search.js] Next Page Token : ${nextPageToken}`);
+      if(searchKeyword !== undefined && nextPageToken !== undefined) {
+        const url = "/youtubeSearchList";
+        const params = {
+          "keyword" : searchKeyword,
+          "nextPageToken" : nextPageToken
+        }
+
+        api.doGet(url, params)
+          .then((response) => {
+            const responseData = JSON.parse(response.data.data);
+            
+            if(responseData !== undefined) {
+              addResult(responseData.items);
+            }
+    
+            if(responseData.nextPageToken !== undefined) {
+              secureStore.save("nextPageToken", responseData.nextPageToken);
+            }
+          })
+          .catch((error) => {
+            Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
+            console.log(`[Search.js] onEndReached() Error : ${error}`);
+          });
+      }
+    };
 
     const handleSearch = async () => {
       const api = new Api();
-      const url = "/youtubeSearchList";
-      const params = {
-        "keyword" : searchKeyword
-      }
+      const secureStore = new SecureStore();
 
-      console.log(`keyword : ${searchKeyword}`);
+      if(searchKeyword.length > 0) {
+        const url = "/youtubeSearchList";      
+        const params = {
+          "keyword" : searchKeyword
+        }
 
-      api.doGet(url, params)
-        .then((response) => {
-          console.log(`response : ${JSON.stringify(response)}`);
-        })
-        .catch((error) => {
-
+        api.doGet(url, params).then( async (response) => {
+          const responseData = JSON.parse(response.data.data);
+          
+          if(responseData !== undefined) {
+            setSearchResult(responseData.items);
+          }
+  
+          if(responseData.nextPageToken !== undefined) {
+            secureStore.save("nextPageToken", responseData.nextPageToken);
+          }
+        }).catch((error) => {
+          Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
+          console.error(`[Search.js] Get Search List Failed : ${error}`);
         });
+      }
     }
 
     return (
@@ -48,7 +144,7 @@ const Search = () => {
               placeholder="Search"
               variant="outline"
               width="90%"
-              borderRadius="5 "
+              borderRadius="5"
               py="2"
               px="2"
               _hover={{ bg: "gray.600" }} // 포커스 시 배경 색상 변경
@@ -60,9 +156,22 @@ const Search = () => {
           {/* End SearchBar */}
 
           {/* Scrollable Content Start */}
-          {/* <ScrollView w="100%" contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}> */}
-          <SearchResult/>
-          {/* </ScrollView> */}
+          {/* <SearchResult searchResult={searchResult}/> */}
+          <Box bg="#000000" safeArea flex="1">
+            <SwipeListView
+              data={listData}
+              renderItem={renderItem}
+              //renderHiddenItem={renderHiddenItem}
+              rightOpenValue={-130}
+              previewRowKey={'0'}
+              previewOpenValue={-40}
+              previewOpenDelay={3000}
+              onRowDidOpen={onRowDidOpen}
+              initialNumToRender={10}
+              onEndReached={onEndReached}
+              // onEndReachedThreshold={0.5}
+            />
+          </Box>
           {/* Scrollable Content End */}
 
           {/* Start Footer */}
@@ -83,7 +192,6 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#000000',
       alignItems: 'center',
-    //   justifyContent: 'space-between',
     },
     scrollViewContent: {
         flexGrow: 1,

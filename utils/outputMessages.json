@@ -24,7 +24,8 @@
     "LoginError" : "아이디 혹은 비밀번호가 일치하지 않습니다.",
 
     "ServerError.title" : "일시적 오류가 발생하였습니다.",
-    "ServerError.content" : "잠시 후 다시 시도해 주세요"
+    "ServerError.content" : "잠시 후 다시 시도해 주세요",
 
-
+    "SearchError.title" : "검색에 실패하였습니다.",
+    "SearchError.content" : "잠시 후 다시 시도해 주세요."
 }

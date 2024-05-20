@@ -12,8 +12,25 @@ class SecureStore {
     }
 
     async getToken() {
-        const value = JSON.parse(await this.getValue("token"));
-        return new Token(value.acccessTokenData, value.refreshTokenData);
+        let token = undefined;
+        try {
+            token = JSON.parse(await this.getValue("token"));    
+        } catch (error) {
+            console.log(`[SecureStore.js] ERROR : ${error}`);
+        }
+        
+        return (token === undefined) ? undefined : new Token(token.acccessTokenData, token.refreshTokenData);
+    }
+
+    async getNextPageToken() {
+        let nextPageTokne = undefined;
+        try {
+            nextPageTokne = await this.getValue("nextPageToken");    
+        } catch (error) {
+            console.log(`[SecureStore.js] ERROR : ${error}`);
+        }
+        
+        return nextPageTokne;
     }
 }
 

@@ -28,27 +28,32 @@ const Login = ({navigation}) => {
           "password" : password
         }
         
-        loginApi.doPost("/user/login", param).then((response) => {
-          const responseResult = response.data.result;
-          
-          switch (responseResult) {
-            case apiResponse.SUCCESS:
-              const responseData = JSON.parse(response.data.data);
-              const token = new Token(responseData.accessToken, responseData.refreshToken);
+        loginApi.doPost("/user/login", param)
+          .then((response) => {
+            const responseResult = response.data.result;
+            
+            switch (responseResult) {
+              case apiResponse.SUCCESS:
+                const responseData = JSON.parse(response.data.data);
+                const token = new Token(responseData.accessToken, responseData.refreshToken);
 
-              secureStore.save("token", JSON.stringify(token));
-              navigation.navigate("Search");
-              break;
+                secureStore.save("token", JSON.stringify(token));
+                navigation.navigate("Search");
+                break;
 
-            case apiResponse.LOGIN_FAIL:
-              Alert.alert(outputMessages['LoginError']);
-              break;
-          
-            default:
-              Alert.alert(outputMessages['ServerError.title'], outputMessages['ServerError.content']);
-              break;
-          }
-        });
+              case apiResponse.LOGIN_FAIL:
+                Alert.alert(outputMessages['LoginError']);
+                break;
+            
+              default:
+                Alert.alert(outputMessages['ServerError.title'], outputMessages['ServerError.content']);
+                break;
+            }
+          })
+          .catch((error) => {
+            Alert.alert(outputMessages['ServerError.title'], outputMessages['ServerError.content']);
+            console.log(`[Login.js] handleSignIn Error : ${error}`);
+          });
       }
     }
 
@@ -104,8 +109,7 @@ const Login = ({navigation}) => {
               
               <Link 
                 _text={{color: "indigo.500",fontWeight: "medium",fontSize: "sm"}} 
-                // onPress={() => navigation.navigate("SiginUp")}
-                onPress={() => test()}
+                onPress={() => navigation.navigate("SiginUp")}
                 to={{screen : "SiginUp"}}
               >
                 Click!

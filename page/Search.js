@@ -33,7 +33,7 @@ const Search = () => {
 
     const renderItem = ({ item }) => (
       <Box>
-        <Pressable onPress={() => console.log('You touched me')} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+        <Pressable onPress={() => handleOnPress(item.id, item.title, item.thumbnailUrl)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
           <Box pl="5" pr="5" py="2.5">
             <HStack alignItems="center" space={4}>
               <Image
@@ -127,6 +127,51 @@ const Search = () => {
           console.error(`[Search.js] Get Search List Failed : ${error}`);
         });
       }
+    }
+    
+    const extractAudioRequest = (id, title, thumbnailUrl) => {
+      console.log(`[Search.js] extractAudioRequest param :  ${id}, ${title}, ${thumbnailUrl}`);
+      
+      if(id !== undefined && title !== undefined && thumbnailUrl !== undefined) {
+        const api = new Api();
+        const url = "/audio";
+        const params = {
+          "videoId" : id,
+          "title" : title,
+          "thumbnailUrl" : thumbnailUrl 
+        };
+
+        api.doPost(url, params)
+          .then((response) => {
+            // const responseData = JSON.parse(response.data);
+            console.log(`[Search.js] extractAudioRequest responseData : ${JSON.stringify(response.data)}`);
+          })
+          .catch((error) => {
+            console.log(`[Search.js] extractAudioRequest() Error :  ${error}`);
+            Alert.alert("영상 추출에 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
+          });
+      }
+    }
+
+    const handleOnPress = (id, title, thumbnailUrl) => {
+      
+      Alert.alert(
+        "해당 영상의 음원을 추출하시겠습니까?",
+        '',
+        [
+          {
+            text: "예",
+            onPress: () => {
+              extractAudioRequest(id, title, thumbnailUrl);
+            }
+          },
+          {
+            text: "아니오",
+            // style: "cancel"
+          }
+        ],
+        { cancelable: false }
+      );
     }
 
     return (

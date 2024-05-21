@@ -4,7 +4,7 @@ import SecureStore from '../utils/SecureStore';
 
 class Api {
     constructor() {
-        this.host = "192.168.0.139";
+        this.host = "192.168.0.255";
         this.port = "8080";
     }
 
@@ -22,17 +22,21 @@ class Api {
     }
     async doPost(url, params) {
         await this.setHeader();
+
         const requestUrl = `http://${this.host}:${this.port}${url}`;    
         console.log(`Request URL : ${requestUrl}`);
         console.log(`Request Params : ${JSON.stringify(params)}`);
         
-        try {    
-            const reuslt = axios.post(requestUrl, params);
-            return reuslt;
-        } catch (error) {
-            console.log(error);
-            return error.response;
+        const config = {};
+
+        if(this.accessTokenHeader != null && this.refreshTokenHeader != null) {
+          config.headers = {
+            "ACCESS_TOKEN": this.accessTokenHeader,
+            "REFRESH_TOKEN": this.refreshTokenHeader,
+          };
         }
+
+        return axios.post(requestUrl, params,config);
     }
 
     async doGet(url, params) {
@@ -46,7 +50,7 @@ class Api {
         params: params,
       };
   
-      if (this.accessTokenHeader != null && this.refreshTokenHeader != null) {
+      if(this.accessTokenHeader != null && this.refreshTokenHeader != null) {
         config.headers = {
           "ACCESS_TOKEN": this.accessTokenHeader,
           "REFRESH_TOKEN": this.refreshTokenHeader,

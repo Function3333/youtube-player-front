@@ -14,7 +14,7 @@ export default function App() {
   return (
     <NavigationContainer>
         <NativeBaseProvider>
-            <Stack.Navigator initialRouteName="MainPage">
+            <Stack.Navigator initialRouteName="Login">
                 <Stack.Screen name = "Login" component={Login} options={{ title: HEADER_NAME }} />
                 <Stack.Screen name = "SiginUp" component={SignUp}/>
                 <Stack.Screen name = "VerifyEmail" component={VerifyEmail}/>

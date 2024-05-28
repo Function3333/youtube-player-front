@@ -1,32 +1,55 @@
-import { View, Input, HStack, VStack, Icon, Box, Text, Pressable, Image, Spacer } from 'native-base';
-import { Ionicons } from "@expo/vector-icons";
+import { View, HStack, VStack, Box, Text, Pressable, Image, Spacer, Icon } from 'native-base';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { Alert, StyleSheet } from 'react-native';
 import { useState, useEffect} from 'react';
 
 import Api from '../utils/Api';
 import outputMessages from '../utils/outputMessages.json';
-import AppBar from '../component/AppBar';
-import Footer from '../component/Footer';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
 
-const PlayList = ({navigation}) => {
-    const [searchKeyword, setSearchKeyword] = useState("");
-    const [searchResult, setSearchResult] = useState([]);
+const PlayList = () => {
+    const [playList, setPlayList] = useState([]);
     const [listData, setListData] = useState([]);
 
-    //Start Render Search Result Logic
     useEffect(() => {
-      const formattedData = searchResult.map((item, index) => ({
+      const formattedData = playList.map((item, index) => ({
         key : index.toString(),
-        id : item.id.videoId,
-        title : item.snippet.title,
-        channelTitle : item.snippet.channelTitle,
-        thumbnailUrl : item.snippet.thumbnails.high.url,
+        id : item.id,
+        title : item.audio.youtubeTitle,
+        audioUrl : item.audio.audioUrl,
+        thumbnailUrl : item.audio.thumbnailUrl,
       }));
       setListData(formattedData);
-    }, [searchResult]);
+    }, [playList]);
+
+    useEffect(() => {
+      getPlayList();
+    }, []);
+
+    const getPlayList = () => {
+      const api = new Api();
+      const url = "/playList";
+      const params = {}
+      
+      api.doGet(url, params)
+        .then((response) => {
+          const responseData = response.data;
+          
+          if(responseData.result === apiResponse.SUCCESS) {
+            const jsonObject = JSON.parse(responseData.data);
+            console.log(`data.audio  : ${JSON.stringify(jsonObject)}`);
+            setPlayList(jsonObject);
+          }
+        })
+        .catch((error) => {
+          console.log(`[PlayList.js] Get PlayList Failed : ${error}`);
+          Alert.alert("재생목록을 가져오는데 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
+        });
+    }
+
+
   
     const onRowDidOpen = rowKey => {
       console.log('This row opened', rowKey);
@@ -56,7 +79,7 @@ const PlayList = ({navigation}) => {
                   {item.title}
                 </Text>
                 <Text color="white" _dark={{color: 'warmGray.200'}}>
-                  {item.channelTitle}    
+                  {/* {item.audioUrl}     */}
                 </Text>
               </VStack>
               <Spacer />
@@ -67,119 +90,45 @@ const PlayList = ({navigation}) => {
     );
     //End Render Search Result Logic
 
+
+  const renderHiddenItem = (data, rowMap) => 
+  <HStack flex="1" pl="2">
+    <Pressable w="70" ml="auto" cursor="pointer" bg="coolGray.200" justifyContent="center" onPress={() => closeRow(rowMap, data.item.key)} _pressed={{
+      opacity: 0.5
+    }}>
+        <VStack alignItems="center" space={2}>
+          <Icon as={<Entypo name="dots-three-horizontal" />} size="xs" color="coolGray.800" />
+          <Text fontSize="xs" fontWeight="medium" color="coolGray.800">
+            More
+          </Text>
+        </VStack>
+      </Pressable>
+      <Pressable w="70" cursor="pointer" bg="red.500" justifyContent="center" onPress={() => deleteRow(rowMap, data.item.key)} _pressed={{
+      opacity: 0.5
+    }}>
+        <VStack alignItems="center" space={2}>
+          <Icon as={<MaterialIcons name="delete" />} color="white" size="xs" />
+          <Text color="white" fontSize="xs" fontWeight="medium">
+            Delete
+          </Text>
+        </VStack>
+      </Pressable>
+  </HStack>;
+
     const addResult = (newResults) => {
       setSearchResult((prevResults) => [...prevResults, ...newResults]);
     };
     
-    const onEndReached = async () => {
-      const api = new Api();
-      const secureStore = new SecureStore();
-      const nextPageToken = await secureStore.getNextPageToken();
-
-      console.log(`[Search.js] Next Page Token : ${nextPageToken}`);
-      if(searchKeyword !== undefined && nextPageToken !== undefined) {
-        const url = "/youtubeSearchList";
-        const params = {
-          "keyword" : searchKeyword,
-          "nextPageToken" : nextPageToken
-        }
-
-        api.doGet(url, params)
-          .then((response) => {
-            const responseData = JSON.parse(response.data.data);
-            
-            if(responseData !== undefined) {
-              addResult(responseData.items);
-            }
-    
-            if(responseData.nextPageToken !== undefined) {
-              secureStore.save("nextPageToken", responseData.nextPageToken);
-            }
-          })
-          .catch((error) => {
-            Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
-            console.log(`[Search.js] onEndReached() Error : ${error}`);
-          });
+    const onScroll = (event) => {
+      console.log(`offset : ${event.nativeEvent.contentOffset.y}`);
+      if (event.nativeEvent.contentOffset.y === -100) { // 스크롤 위치가 -50 픽셀보다 작을 때
+        console.log(`refresh`);
       }
-    };
+  };
 
-    const handleSearch = async () => {
-      const api = new Api();
-      const secureStore = new SecureStore();
-
-      if(searchKeyword.length > 0) {
-        const url = "/youtubeSearchList";      
-        const params = {
-          "keyword" : searchKeyword
-        }
-
-        api.doGet(url, params).then( async (response) => {
-          const responseData = JSON.parse(response.data.data);
-          
-          if(responseData !== undefined) {
-            setSearchResult(responseData.items);
-          }
-  
-          if(responseData.nextPageToken !== undefined) {
-            secureStore.save("nextPageToken", responseData.nextPageToken);
-          }
-        }).catch((error) => {
-          Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
-          console.error(`[Search.js] Get Search List Failed : ${error}`);
-        });
-      }
-    }
-    
-    const extractAudioRequest = (id, title, thumbnailUrl) => {
-      console.log(`[Search.js] extractAudioRequest param :  ${id}, ${title}, ${thumbnailUrl}`);
-      
-      if(id !== undefined && title !== undefined && thumbnailUrl !== undefined) {
-        const api = new Api();
-        const url = "/audio";
-        const params = {
-          "videoId" : id,
-          "title" : title,
-          "thumbnailUrl" : thumbnailUrl 
-        };
-
-        api.doPost(url, params)
-          .then((response) => {
-            const result = response.data.result;
-            
-            if(result === apiResponse.SUCCESS) {
-              Alert.alert("추출에 성공하였습니다.");
-              
-            }else {
-              Alert.alert("추출에 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
-            }
-            console.log(`[Search.js] extractAudioRequest responseData : ${JSON.stringify(response.data)}`);
-          })
-          .catch((error) => {
-            console.log(`[Search.js] extractAudioRequest() Error :  ${error}`);
-            Alert.alert("영상 추출에 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
-          });
-      }
-    }
 
     const handleOnPress = (id, title, thumbnailUrl) => {
-      
-      Alert.alert(
-        "해당 영상의 음원을 추출하시겠습니까?",
-        '',
-        [
-          {
-            text: "예",
-            onPress: () => {
-              extractAudioRequest(id, title, thumbnailUrl);
-            }
-          },
-          {
-            text: "아니오",
-            // style: "cancel"
-          }
-        ],
-        { cancelable: false }
-      );
+
     }
 
     return (
@@ -214,15 +163,16 @@ const PlayList = ({navigation}) => {
             <SwipeListView
               data={listData}
               renderItem={renderItem}
-              //renderHiddenItem={renderHiddenItem}
+              renderHiddenItem={renderHiddenItem}
               rightOpenValue={-130}
               previewRowKey={'0'}
               previewOpenValue={-40}
               previewOpenDelay={3000}
               onRowDidOpen={onRowDidOpen}
               initialNumToRender={10}
-              onEndReached={onEndReached}
+              // onEndReached={onEndReached}
               // onEndReachedThreshold={0.5}
+              onScroll={onScroll}
             />
           </Box>
           {/* Scrollable Content End */}

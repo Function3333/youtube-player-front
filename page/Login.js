@@ -38,7 +38,7 @@ const Login = ({navigation}) => {
                 const token = new Token(responseData.accessToken, responseData.refreshToken);
 
                 secureStore.save("token", JSON.stringify(token));
-                navigation.navigate("Search");
+                navigation.navigate("MainPage");
                 break;
 
               case apiResponse.LOGIN_FAIL:

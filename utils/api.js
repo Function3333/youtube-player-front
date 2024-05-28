@@ -4,7 +4,7 @@ import SecureStore from '../utils/SecureStore';
 
 class Api {
     constructor() {
-        this.host = "192.168.0.255";
+        this.host = "192.168.0.2";
         this.port = "8080";
     }
 
@@ -36,7 +36,7 @@ class Api {
           };
         }
 
-        return axios.post(requestUrl, params,config);
+        return axios.post(requestUrl, params, config);
     }
 
     async doGet(url, params) {

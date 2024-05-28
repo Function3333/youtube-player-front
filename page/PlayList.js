@@ -11,7 +11,7 @@ import Footer from '../component/Footer';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
 
-const Search = ({navigation}) => {
+const PlayList = ({navigation}) => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchResult, setSearchResult] = useState([]);
     const [listData, setListData] = useState([]);
@@ -59,7 +59,7 @@ const Search = ({navigation}) => {
                   {item.channelTitle}    
                 </Text>
               </VStack>
-              <Spacer/>
+              <Spacer />
             </HStack>
           </Box>
         </Pressable>
@@ -189,7 +189,7 @@ const Search = ({navigation}) => {
           {/* End AppBar */}
 
           {/* Start SearchBar */}
-          <View style={styles.searchContainer}>
+          {/* <View style={styles.searchContainer}>
             <Input
               style={styles.inputText} 
               onChangeText={setSearchKeyword}
@@ -205,7 +205,7 @@ const Search = ({navigation}) => {
                 <Icon ml="2" size="4" color="gray.400" as={<Ionicons name="search" />} />
               }
             />
-          </View>
+          </View> */}
           {/* End SearchBar */}
 
           {/* Scrollable Content Start */}
@@ -226,13 +226,6 @@ const Search = ({navigation}) => {
             />
           </Box>
           {/* Scrollable Content End */}
-
-          {/* Start Footer */}
-          {/* <HStack px="1" py="3"  justifyContent="space-between">
-            <Footer navigation={navigation} calledBy={"Search"}/>
-          </HStack> */}
-          {/* End Footer */}
-
         </View>
     )
 }
@@ -258,4 +251,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Search;
+export default PlayList;

@@ -10,6 +10,7 @@ import AppBar from '../component/AppBar';
 import Footer from '../component/Footer';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
+import he from 'he';
 
 const Search = ({navigation}) => {
     const [searchKeyword, setSearchKeyword] = useState("");
@@ -21,7 +22,8 @@ const Search = ({navigation}) => {
       const formattedData = searchResult.map((item, index) => ({
         key : index.toString(),
         id : item.id.videoId,
-        title : item.snippet.title,
+        // title : item.snippet.title,
+        title : he.decode(item.snippet.title),
         channelTitle : item.snippet.channelTitle,
         thumbnailUrl : item.snippet.thumbnails.high.url,
       }));

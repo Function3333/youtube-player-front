@@ -12,14 +12,13 @@ class SecureStore {
     }
 
     async getToken() {
-        let token = undefined;
+        let token = null;
         try {
             token = JSON.parse(await this.getValue("token"));    
         } catch (error) {
             console.log(`[SecureStore.js] ERROR : ${error}`);
         }
-        
-        return (token === undefined) ? undefined : new Token(token.acccessTokenData, token.refreshTokenData);
+        return (token === null) ? null : new Token(token.acccessTokenData, token.refreshTokenData);
     }
 
     async getNextPageToken() {

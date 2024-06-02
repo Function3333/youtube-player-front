@@ -206,15 +206,11 @@ const Search = ({navigation}) => {
               }
             />
           </View>
-          {/* End SearchBar */}
-
-          {/* Scrollable Content Start */}
-          {/* <SearchResult searchResult={searchResult}/> */}
+          
           <Box bg="#000000" safeArea flex="1">
             <SwipeListView
               data={listData}
               renderItem={renderItem}
-              //renderHiddenItem={renderHiddenItem}
               rightOpenValue={-130}
               previewRowKey={'0'}
               previewOpenValue={-40}
@@ -222,17 +218,8 @@ const Search = ({navigation}) => {
               onRowDidOpen={onRowDidOpen}
               initialNumToRender={10}
               onEndReached={onEndReached}
-              // onEndReachedThreshold={0.5}
             />
           </Box>
-          {/* Scrollable Content End */}
-
-          {/* Start Footer */}
-          {/* <HStack px="1" py="3"  justifyContent="space-between">
-            <Footer navigation={navigation} calledBy={"Search"}/>
-          </HStack> */}
-          {/* End Footer */}
-
         </View>
     )
 }

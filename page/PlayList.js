@@ -4,14 +4,21 @@ import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { Alert, StyleSheet } from 'react-native';
 import { useState, useEffect} from 'react';
 
+import MediaPlayer from '../component/MediaPlayer';
 import Api from '../utils/Api';
-import outputMessages from '../utils/outputMessages.json';
-import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
+
 
 const PlayList = () => {
     const [playList, setPlayList] = useState([]);
     const [listData, setListData] = useState([]);
+    const [currentIdx, setCurrentIdx] = useState(0);
+    const [audio, setAudio] = useState({});
+
+    // Start useEffect Logic
+    useEffect(() => {
+      getPlayList();
+    }, []);
 
     useEffect(() => {
       const formattedData = playList.map((item, index) => ({
@@ -22,11 +29,29 @@ const PlayList = () => {
         thumbnailUrl : item.audio.thumbnailUrl,
       }));
       setListData(formattedData);
+      console.log(`PlayList.js listData : ${JSON.stringify(listData)}`);
     }, [playList]);
 
     useEffect(() => {
-      getPlayList();
-    }, []);
+      if(listData.length > 0) {
+        setAudio({
+          "title" : listData[currentIdx].title,
+          "thumbnailUrl" : listData[currentIdx].thumbnailUrl,
+          "audioUrl" : listData[currentIdx].audioUrl.replace("\"", ""),
+          "playListSize" : listData.length
+        });
+      }
+    }, [currentIdx]);
+    // End useEffect Logic
+
+    const handleOnPress = (title, thumbnailUrl, audioUrl) => {
+      setAudio({
+        "title" : title,
+        "thumbnailUrl" : thumbnailUrl,
+        "audioUrl" : audioUrl.replace("\"", ""),
+        "playListSize" : listData.length
+      });
+    }
 
     const getPlayList = () => {
       const api = new Api();
@@ -39,7 +64,6 @@ const PlayList = () => {
           
           if(responseData.result === apiResponse.SUCCESS) {
             const jsonObject = JSON.parse(responseData.data);
-            console.log(`data.audio  : ${JSON.stringify(jsonObject)}`);
             setPlayList(jsonObject);
           }
         })
@@ -57,7 +81,7 @@ const PlayList = () => {
 
     const renderItem = ({ item }) => (
       <Box>
-        <Pressable onPress={() => handleOnPress(item.id, item.title, item.thumbnailUrl)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+        <Pressable onPress={() => handleOnPress(item.title, item.thumbnailUrl, item.audioUrl)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
           <Box pl="5" pr="5" py="2.5">
             <HStack alignItems="center" space={4}>
               <Image
@@ -114,10 +138,6 @@ const PlayList = () => {
         </VStack>
       </Pressable>
   </HStack>;
-
-    const addResult = (newResults) => {
-      setSearchResult((prevResults) => [...prevResults, ...newResults]);
-    };
     
     const onScroll = (event) => {
       console.log(`offset : ${event.nativeEvent.contentOffset.y}`);
@@ -127,38 +147,10 @@ const PlayList = () => {
   };
 
 
-    const handleOnPress = (id, title, thumbnailUrl) => {
-
-    }
 
     return (
         <View style={styles.container}>
-          {/* Start AppBar */}
-          {/* <AppBar/> */}
-          {/* End AppBar */}
 
-          {/* Start SearchBar */}
-          {/* <View style={styles.searchContainer}>
-            <Input
-              style={styles.inputText} 
-              onChangeText={setSearchKeyword}
-              onSubmitEditing={handleSearch}
-              placeholder="Search"
-              variant="outline"
-              width="90%"
-              borderRadius="5"
-              py="2"
-              px="2"
-              _hover={{ bg: "gray.600" }} // 포커스 시 배경 색상 변경
-              InputLeftElement={
-                <Icon ml="2" size="4" color="gray.400" as={<Ionicons name="search" />} />
-              }
-            />
-          </View> */}
-          {/* End SearchBar */}
-
-          {/* Scrollable Content Start */}
-          {/* <SearchResult searchResult={searchResult}/> */}
           <Box bg="#000000" safeArea flex="1">
             <SwipeListView
               data={listData}
@@ -175,7 +167,7 @@ const PlayList = () => {
               onScroll={onScroll}
             />
           </Box>
-          {/* Scrollable Content End */}
+          <MediaPlayer audio={audio} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>
         </View>
     )
 }

@@ -4,7 +4,7 @@ import SecureStore from '../utils/SecureStore';
 
 class Api {
     constructor() {
-        this.host = "192.168.0.139";
+        this.host = "192.168.0.4";
         this.port = "8080";
     }
 
@@ -12,8 +12,7 @@ class Api {
         const secureStore = new SecureStore();
         const token = await secureStore.getToken();
 
-        if(token.isTokenValide()) {
-            console.log("[Api.js] Set Request Header");
+        if(token != null && token.isTokenValide()) {
             this.accessTokenHeader = token.acccessTokenData.payload;
             this.refreshTokenHeader = token.refreshTokenData.payload;
         } else {

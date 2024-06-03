@@ -1,15 +1,16 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { Audio } from 'expo-av';
+import React, { createContext, useState, useEffect, useContext} from "react";
+import { Audio } from "expo-av";
 
-export const AudioContext = createContext();
+const AudioContext = createContext();
 
-export const AudioProvider = ({ children }) => {
+export const AudioProvider = ({children}) => {
     const [sound, setSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [currentAudio, setCurrentAudio] = useState(null);
+    const [title, setTitle] = useState("");
 
+    // Start useEffect Logic
     useEffect(() => {
         const enableAudio = async () => {
             await Audio.setAudioModeAsync({
@@ -19,27 +20,24 @@ export const AudioProvider = ({ children }) => {
             });
         };
         enableAudio();
-
-        return () => {
-            if (sound) {
-                sound.unloadAsync();
-            }
-        };
     }, []);
+    // End useEffect Logic
 
-    const loadSound = async (audio) => {
-        if (sound) {
+    const loadSound = async (audioUrl, autoPlay = false) => {
+        if(sound) {
             await sound.unloadAsync();
+            setSound(null);
         }
-        const { sound: newSound, status } = await Audio.Sound.createAsync(
-            { uri: audio.audioUrl },
-            {},
-            updateScreenForSoundStatus
-        );
+
+        const { sound: newSound, status } = await Audio.Sound.createAsync({uri : audioUrl}, {}, updateScreenForSoundStatus);
         setSound(newSound);
         setDuration(status.durationMillis);
-        setCurrentAudio(audio);
-    };
+
+        if(autoPlay) {
+            await newSound.playAsync();
+            setIsPlaying(true);
+        }
+    }
 
     const updateScreenForSoundStatus = (status) => {
         if (status.isLoaded) {
@@ -47,9 +45,9 @@ export const AudioProvider = ({ children }) => {
             setDuration(status.durationMillis);
             setIsPlaying(status.isPlaying);
         } else if (status.error) {
-            console.log(`FATAL PLAYER ERROR: ${status.error}`);
+            console.log(`[AudioProvider] updateScreenForSoundStatus Error : ${status.error}`);
         }
-    };
+    }
 
     const playSound = async () => {
         if (sound) {
@@ -65,19 +63,25 @@ export const AudioProvider = ({ children }) => {
         }
     };
 
-    const value = {
-        sound,
-        isPlaying,
-        position,
-        duration,
-        currentAudio,
-        loadSound,
-        playSound,
-        pauseSound,
-        setPosition,
-        setDuration,
-        setIsPlaying,
+    const unloadSound = async () => {
+        if (sound) {
+            await sound.unloadAsync();
+            setSound(null);
+        }
     };
 
-    return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
-};
+    return (
+        <AudioContext.Provider 
+        value={{
+            sound, isPlaying, 
+            position, duration, 
+            title, setTitle,
+            loadSound, playSound, 
+            pauseSound, unloadSound 
+        }}>
+            {children}
+        </AudioContext.Provider>
+    )
+}
+
+export const useAudioProvider = () => useContext(AudioContext);

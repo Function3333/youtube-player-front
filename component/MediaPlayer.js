@@ -3,72 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-
+import { useAudioProvider } from './AudioProvider';
 
 const MediaPlayer = ({audio, currentIdx, setCurrentIdx}) => {
-    const [sound, setSound] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [position, setPosition] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const { sound, isPlaying, position, duration, loadSound, playSound, pauseSound, title, setTitle} = useAudioProvider();
 
     // Start useEffect Logic 
     useEffect(() => {
-        const enableAudio = async () => {
-            await Audio.setAudioModeAsync({
-                playsInSilentModeIOS: true,
-                staysActiveInBackground: true,
-                shouldDuckAndroid: false,
-            });
-        };
-        enableAudio();
-    
-        if (audio.audioUrl) {
-            loadSound();
+        if(audio.audioUrl) {
+            loadSound(audio.audioUrl, true);
         }
-        return () => {
-            if (sound) {
-                sound.unloadAsync();
-            }
-        };
-    }, [audio.audioUrl]);
 
-    useEffect(() => {
-        return sound ? () => { sound.unloadAsync(); } : undefined;
-    }, [audio.audioUrl]);
+        if(audio.title) {
+            setTitle(audio.title);
+        }
+    },[audio]);
     // End useEffect Logic 
-
-    const loadSound = async () => {
-        if (sound) {
-            await sound.unloadAsync();
-        }
-        const { sound: newSound, status } = await Audio.Sound.createAsync({ uri: audio.audioUrl }, {}, updateScreenForSoundStatus);
-        setSound(newSound);
-        setDuration(status.durationMillis);
-    };
-
-    const updateScreenForSoundStatus = (status) => {
-        if (status.isLoaded) {
-            setPosition(status.positionMillis);
-            setDuration(status.durationMillis);
-            setIsPlaying(status.isPlaying);
-        } else if (status.error) {
-            console.log(`FATAL PLAYER ERROR: ${status.error}`);
-        }
-    };
-
-    const playSound = async () => {
-        if (sound) {
-            await sound.playAsync();
-            setIsPlaying(true);
-        }
-    };
-
-    const pauseSound = async () => {
-        if (sound) {
-            await sound.pauseAsync();
-            setIsPlaying(false);
-        }
-    };
 
     const handlePlayPrevious = () => {
         if(currentIdx > 0) {
@@ -94,7 +44,7 @@ const MediaPlayer = ({audio, currentIdx, setCurrentIdx}) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{audio.title}</Text>
+            <Text style={styles.title}>{title}</Text>
             {/* <Text style={styles.artist}>{audio.title}</Text> */}
             <Slider
                 style={styles.slider}

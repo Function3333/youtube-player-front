@@ -144,7 +144,7 @@ const PlayList = () => {
       if (event.nativeEvent.contentOffset.y === -100) { // 스크롤 위치가 -50 픽셀보다 작을 때
         console.log(`refresh`);
       }
-  };
+    };
 
 
 
@@ -164,7 +164,7 @@ const PlayList = () => {
               initialNumToRender={10}
               // onEndReached={onEndReached}
               // onEndReachedThreshold={0.5}
-              onScroll={onScroll}
+              //onScroll={onScroll}
             />
           </Box>
           <MediaPlayer audio={audio} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>

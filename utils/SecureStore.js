@@ -11,17 +11,22 @@ class SecureStore {
         return ExpoSecureStore.getItemAsync(key);
     }
 
-    async saveCurrentAudio (value) {
-        this.save("currentAudio", value);
+    async saveCurrentIdx (value) {
+        try {
+            //this.save("currentIdx", JSON.stringify(value));    
+            this.save("currentIdx", value);
+        } catch (error) {
+            console.log(`[SecureStore.js] saveCurrentIdx() ERROR : ${error}`);
+        }    
     }
 
-    async getCurrentAudio() {
+    async getCurrentIdx() {
         let currentAudio = null;
 
         try {
-            currentAudio = JSON.parse(await this.getValue("currentAudio"));    
+            currentAudio = JSON.parse(await this.getValue("currentIdx"));    
         } catch (error) {
-            console.log(`[SecureStore.js] getCurrentAudio() ERROR : ${error}`);
+            console.log(`[SecureStore.js] getCurrentIdx() ERROR : ${error}`);
         }
         return currentAudio;
     }

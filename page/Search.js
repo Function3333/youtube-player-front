@@ -6,8 +6,6 @@ import { useState, useEffect} from 'react';
 
 import Api from '../utils/Api';
 import outputMessages from '../utils/outputMessages.json';
-import AppBar from '../component/AppBar';
-import Footer from '../component/Footer';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
 import he from 'he';
@@ -22,7 +20,6 @@ const Search = ({navigation}) => {
       const formattedData = searchResult.map((item, index) => ({
         key : index.toString(),
         id : item.id.videoId,
-        // title : item.snippet.title,
         title : he.decode(item.snippet.title),
         channelTitle : item.snippet.channelTitle,
         thumbnailUrl : item.snippet.thumbnails.high.url,
@@ -186,9 +183,6 @@ const Search = ({navigation}) => {
 
     return (
         <View style={styles.container}>
-          {/* Start AppBar */}
-          {/* <AppBar/> */}
-          {/* End AppBar */}
 
           {/* Start SearchBar */}
           <View style={styles.searchContainer}>
@@ -202,14 +196,26 @@ const Search = ({navigation}) => {
               borderRadius="5"
               py="2"
               px="2"
-              _hover={{ bg: "gray.600" }} // 포커스 시 배경 색상 변경
+              _hover={{ bg: "gray.600" }} 
               InputLeftElement={
                 <Icon ml="2" size="4" color="gray.400" as={<Ionicons name="search" />} />
               }
             />
+
+            <SwipeListView
+              style={styles.test}
+              data={listData}
+              renderItem={renderItem}
+              previewRowKey={'0'}
+              previewOpenValue={-40}
+              previewOpenDelay={3000}
+              onRowDidOpen={onRowDidOpen}
+              initialNumToRender={10}
+              onEndReached={onEndReached}
+            />
           </View>
           
-          <Box bg="#000000" safeArea flex="1">
+          {/* <Box bg="#000000" safeArea flex="1">
             <SwipeListView
               data={listData}
               renderItem={renderItem}
@@ -221,7 +227,7 @@ const Search = ({navigation}) => {
               initialNumToRender={10}
               onEndReached={onEndReached}
             />
-          </Box>
+          </Box> */}
         </View>
     )
 }
@@ -242,9 +248,12 @@ const styles = StyleSheet.create({
     searchContainer: {
       width: "100%",
       alignItems: 'center',
-      // marginBottom: 10,
-      marginTop: 40,
+      marginBottom: 50,
+      marginTop: 15,
     },
+    test : {
+      marginTop: 25
+    }
 });
 
 export default Search;

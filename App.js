@@ -2,6 +2,7 @@ import { NativeBaseProvider } from 'native-base';
 import {NavigationContainer} from '@react-navigation/native';
 import { useEffect } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { LogBox } from 'react-native';
 import Login from './page/Login'
 import SignUp from './page/SignUp';
 import VerifyEmail from './page/VerifyEmail';
@@ -9,15 +10,16 @@ import Search from './page/Search';
 import PlayList from './page/PlayList';
 import MainPage from './page/MainPage';
 import TrackPlayer from 'react-native-track-player';
-import trackPlayerService from './component/TrackPlayerService'
+
 
 const Stack = createNativeStackNavigator();
 const HEADER_NAME = "Youtube Player"
 
 export default function App() {
   
-  //init react-tack-player
   useEffect(() => {
+    LogBox.ignoreAllLogs();
+
     const setupPlayer = async () => {
       await TrackPlayer.setupPlayer({});
 
@@ -30,14 +32,20 @@ export default function App() {
           TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
           TrackPlayer.CAPABILITY_SEEK_TO,
         ],
-        //?
         compactCapabilities: [
           TrackPlayer.CAPABILITY_PLAY,
           TrackPlayer.CAPABILITY_PAUSE,
           TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-      ],
+          TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+        ],
+        notificationCapabilities: [
+            TrackPlayer.CAPABILITY_PLAY,
+            TrackPlayer.CAPABILITY_PAUSE,
+            TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+            TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+        ],
       })
-      TrackPlayer.registerPlaybackService(() => trackPlayerService);
+      TrackPlayer.registerPlaybackService(() => require('./component/service.js'));
     }
 
     setupPlayer();
@@ -45,7 +53,7 @@ export default function App() {
     //   TrackPlayer.destroy();
     // };
 
-  }, [])
+  }, []);
 
   return (
     <NavigationContainer>

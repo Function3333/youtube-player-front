@@ -13,7 +13,6 @@ const PlayList = () => {
     const [playList, setPlayList] = useState([]);
     const [listData, setListData] = useState([]);
     const [currentIdx, setCurrentIdx] = useState(0);
-    const [audio, setAudio] = useState({});
 
     // Start useEffect Logic
     useEffect(() => {
@@ -28,29 +27,25 @@ const PlayList = () => {
         audioUrl : item.audio.audioUrl,
         thumbnailUrl : item.audio.thumbnailUrl,
       }));
+
       setListData(formattedData);
-      console.log(`PlayList.js listData : ${JSON.stringify(listData)}`);
     }, [playList]);
 
-    useEffect(() => {
-      if(listData.length > 0) {
-        setAudio({
-          "title" : listData[currentIdx].title,
-          "thumbnailUrl" : listData[currentIdx].thumbnailUrl,
-          "audioUrl" : listData[currentIdx].audioUrl.replace("\"", ""),
-          "playListSize" : listData.length
-        });
-      }
-    }, [currentIdx]);
+    // useEffect(() => {
+    //   if(listData.length > 0) {
+    //     setAudio({
+    //       "title" : listData[currentIdx].title,
+    //       "thumbnailUrl" : listData[currentIdx].thumbnailUrl,
+    //       "audioUrl" : listData[currentIdx].audioUrl.replace("\"", ""),
+    //       "playListSize" : listData.length
+    //     });
+    //   }
+    // }, [currentIdx]);
     // End useEffect Logic
 
-    const handleOnPress = (title, thumbnailUrl, audioUrl) => {
-      setAudio({
-        "title" : title,
-        "thumbnailUrl" : thumbnailUrl,
-        "audioUrl" : audioUrl.replace("\"", ""),
-        "playListSize" : listData.length
-      });
+    const handleOnPress = (key) => {
+      console.log(`PlayList : ${key}`)
+      setCurrentIdx(key);
     }
 
     const getPlayList = () => {
@@ -81,8 +76,8 @@ const PlayList = () => {
 
     const renderItem = ({ item }) => (
       <Box>
-        <Pressable onPress={() => handleOnPress(item.title, item.thumbnailUrl, item.audioUrl)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
-          <Box pl="5" pr="5" py="2.5">
+        <Pressable onPress={() => handleOnPress(item.key)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+          <Box pl="5" pr="5" py="1">
             <HStack alignItems="center" space={4}>
               <Image
                 size="80px"
@@ -101,9 +96,6 @@ const PlayList = () => {
                   ellipsizeMode="tail" // 텍스트가 넘칠 경우 ...으로 표시
                 >
                   {item.title}
-                </Text>
-                <Text color="white" _dark={{color: 'warmGray.200'}}>
-                  {/* {item.audioUrl}     */}
                 </Text>
               </VStack>
               <Spacer />
@@ -141,12 +133,10 @@ const PlayList = () => {
     
     const onScroll = (event) => {
       console.log(`offset : ${event.nativeEvent.contentOffset.y}`);
-      if (event.nativeEvent.contentOffset.y === -100) { // 스크롤 위치가 -50 픽셀보다 작을 때
+      if (event.nativeEvent.contentOffset.y === -100) { 
         console.log(`refresh`);
       }
     };
-
-
 
     return (
         <View style={styles.container}>
@@ -156,7 +146,6 @@ const PlayList = () => {
               data={listData}
               renderItem={renderItem}
               renderHiddenItem={renderHiddenItem}
-              rightOpenValue={-130}
               previewRowKey={'0'}
               previewOpenValue={-40}
               previewOpenDelay={3000}
@@ -167,7 +156,7 @@ const PlayList = () => {
               //onScroll={onScroll}
             />
           </Box>
-          <MediaPlayer audio={audio} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>
+          <MediaPlayer playList={listData} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>
         </View>
     )
 }

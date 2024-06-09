@@ -2,76 +2,105 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import TrackPlayer, { usePlaybackState, useProgress } from 'react-native-track-player';
-import SecureStore from '../utils/SecureStore';
+import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents } from 'react-native-track-player';
 
-const MediaPlayer = ({ audio, currentIdx, setCurrentIdx }) => {
+
+const MediaPlayer = ({ playList, currentIdx }) => {
     const playbackState = usePlaybackState();
     const { position, duration } = useProgress();
     const [title, setTitle] = useState('');
-    
 
+    // Start useEffect Logic
     useEffect(() => {
-        const setupTrack = async () => {    
-            const secureStore = new SecureStore();
-            
-            const secureStoreAudioUrl = await secureStore.getCurrentAudio();
-            const currentUrl = (await TrackPlayer.getActiveTrack())?.url;
+        const setupPlayer = async () => {
+            const formattedPlayList = playList.map(track => ({
+                id: track.id,
+                url: track.audioUrl.replace(/"$/, ''), 
+                title: track.title,
+                artist: 'Unknown',
+                artwork: track.thumbnailUrl
+            }));
 
-            console.log(`currentUrl : ${currentUrl}`);
-            console.log(`secureStoreAudioUrl : ${JSON.stringify(secureStoreAudioUrl)}`);
-            console.log(`audio : ${JSON.stringify(audio)}`);
-            // console.log(`currentTack : ${currentTrack}`);
-
-            secureStore.save("currentAudio", audio);
-            if(currentUrl !== secureStoreAudioUrl) {
-                await TrackPlayer.reset();
-                await TrackPlayer.add({
-                    id : currentIdx,
-                    url: audio.audioUrl,
-                    title: audio.title,
-                    artist: 'Unknown',
-                    artwork: audio.thumbnailUrl
-                });
-            
-                setTitle(audio.title);
-                secureStore.saveCurrentAudio(audio);
-                await TrackPlayer.play();
-            }else {
-                const currentTitle = (await TrackPlayer.getActiveTrack()).title;
-                console.log(`currentTitle : ${currentTitle}`);
-                setTitle(currentTitle);
-            }
+            await TrackPlayer.add(formattedPlayList);
         };
 
-        setupTrack();
-    }, [audio]);
+        setupPlayer();
+        updateTitle();
+    }, [playList]);
+    
+    useEffect(() => {
+        if(currentIdx) {
+            playTrackById(currentIdx);
+        }
+    }, [currentIdx]);
+    // End useEffect Logic
 
-    const handlePlayPrevious = () => {
-        if(currentIdx > 0) {
-            setCurrentIdx(currentIdx - 1);
+    const playTrackById = async (id) => {
+        try {
+            await TrackPlayer.skip(parseInt(id));
+            await TrackPlayer.play();
+            updateTitle();    
+        } catch (error) {
+            console.log(`[MediaPlayer.js] PlayTrackById Failed`);
+            console.log(error);
         }
     }
 
+    const updateTitle = async () => {
+        const activeTrackIdx = parseInt(await TrackPlayer.getActiveTrackIndex());
+        
+        let track = null;
+        if(!isNaN(activeTrackIdx)) {
+            track =  await TrackPlayer.getTrack(activeTrackIdx);
+        }else {
+            track =  await TrackPlayer.getTrack(0);
+        }
+
+        setTitle(track.title);
+    }
+
+    const handlePlayPrevious = async () => {
+        await TrackPlayer.skipToPrevious();
+        await TrackPlayer.play();
+        await updateTitle();
+    };
+
     const handlePlayPause = async () => {
-        if (playbackState.state === "playing") {
+        if (playbackState.state === State.Playing) {
             await TrackPlayer.pause();
         } else {
             await TrackPlayer.play();
+            await updateTitle();
         }
     };
 
-    const handlePlayNext = () => {
-        if((currentIdx + 1) < audio.playListSize) {
-            setCurrentIdx(currentIdx + 1);  
-        } 
-    }
+    const handlePlayNext = async () => {
+        await TrackPlayer.skipToNext();
+        await TrackPlayer.play();
+        await updateTitle();
+    };
 
     const formatTime = (millis) => {
         const minutes = Math.floor(millis / 60000);
         const seconds = ((millis % 60000) / 1000).toFixed(0);
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
+
+    useTrackPlayerEvents(["playback-track-changed"], async event => {
+        if (event.type === "playback-track-changed" && event.nextTrack != null) {
+            const track = await TrackPlayer.getTrack(event.nextTrack);
+            const {title} = track || {};
+            setTitle(title);
+        }
+    });
+
+    useTrackPlayerEvents([Event.RemotePause, Event.RemotePlay ], (event) => {
+        if (event.type === Event.RemotePause) {
+          TrackPlayer.pause();
+        } else if (event.type === Event.RemotePlay) {
+          TrackPlayer.play();
+        }
+    });
 
     return (
         <View style={styles.container}>
@@ -97,7 +126,7 @@ const MediaPlayer = ({ audio, currentIdx, setCurrentIdx }) => {
                     <Ionicons name="play-skip-back" size={32} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayPause}>
-                    <Ionicons name={playbackState.state === "playing" ? "pause" : "play"} size={32} color="white" />
+                    <Ionicons name={playbackState.state === State.Playing ? "pause" : "play"} size={32} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayNext}>
                     <Ionicons name="play-skip-forward" size={32} color="white" />

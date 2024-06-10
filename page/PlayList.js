@@ -1,6 +1,6 @@
 import { View, HStack, VStack, Box, Text, Pressable, Image, Spacer, Icon } from 'native-base';
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { MaterialIcons, Entypo } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Alert, StyleSheet } from 'react-native';
 import { useState, useEffect} from 'react';
 
@@ -14,39 +14,9 @@ const PlayList = () => {
     const [listData, setListData] = useState([]);
     const [currentIdx, setCurrentIdx] = useState(0);
 
-    // Start useEffect Logic
     useEffect(() => {
       getPlayList();
     }, []);
-
-    useEffect(() => {
-      const formattedData = playList.map((item, index) => ({
-        key : index.toString(),
-        id : item.id,
-        title : item.audio.youtubeTitle,
-        audioUrl : item.audio.audioUrl,
-        thumbnailUrl : item.audio.thumbnailUrl,
-      }));
-
-      setListData(formattedData);
-    }, [playList]);
-
-    // useEffect(() => {
-    //   if(listData.length > 0) {
-    //     setAudio({
-    //       "title" : listData[currentIdx].title,
-    //       "thumbnailUrl" : listData[currentIdx].thumbnailUrl,
-    //       "audioUrl" : listData[currentIdx].audioUrl.replace("\"", ""),
-    //       "playListSize" : listData.length
-    //     });
-    //   }
-    // }, [currentIdx]);
-    // End useEffect Logic
-
-    const handleOnPress = (key) => {
-      console.log(`PlayList : ${key}`)
-      setCurrentIdx(key);
-    }
 
     const getPlayList = () => {
       const api = new Api();
@@ -68,32 +38,39 @@ const PlayList = () => {
         });
     }
 
+    useEffect(() => {
+      const formattedData = playList.map((item, index) => ({
+        key : index.toString(),
+        id : item.id,
+        title : item.audio.youtubeTitle,
+        audioUrl : item.audio.audioUrl,
+        thumbnailUrl : item.audio.thumbnailUrl,
+      }));
 
-  
-    const onRowDidOpen = rowKey => {
-      console.log('This row opened', rowKey);
-    };
+      setListData(formattedData);
+    }, [playList]);
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({item}) => (
       <Box>
         <Pressable onPress={() => handleOnPress(item.key)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
           <Box pl="5" pr="5" py="1">
             <HStack alignItems="center" space={4}>
+              
               <Image
                 size="80px"
                 source={{ uri: item.thumbnailUrl }}
                 alt={item.title}
-                borderRadius={0} // 이미지가 사각형이 되도록 설정
               />
+
               <VStack>
                 <Text
                   color="white"
                   _dark={{ color: 'warmGray.50' }}
                   bold
-                  width="280px" // 텍스트 컴포넌트의 최대 너비 설정
-                  flexWrap="wrap" // 너비를 넘어갈 경우 줄 바꿈
-                  numberOfLines={2} // 최대 한 줄만 표시
-                  ellipsizeMode="tail" // 텍스트가 넘칠 경우 ...으로 표시
+                  width="280px" 
+                  flexWrap="wrap" 
+                  numberOfLines={2} 
+                  ellipsizeMode="tail" 
                 >
                   {item.title}
                 </Text>
@@ -104,56 +81,91 @@ const PlayList = () => {
         </Pressable>
       </Box>
     );
-    //End Render Search Result Logic
 
+    const handleOnPress = (key) => {
+      console.log(`PlayList : ${key}`)
+      setCurrentIdx(key);
+    }
 
-  const renderHiddenItem = (data, rowMap) => 
-  <HStack flex="1" pl="2">
-    <Pressable w="70" ml="auto" cursor="pointer" bg="coolGray.200" justifyContent="center" onPress={() => closeRow(rowMap, data.item.key)} _pressed={{
-      opacity: 0.5
-    }}>
-        <VStack alignItems="center" space={2}>
-          <Icon as={<Entypo name="dots-three-horizontal" />} size="xs" color="coolGray.800" />
-          <Text fontSize="xs" fontWeight="medium" color="coolGray.800">
-            More
-          </Text>
-        </VStack>
-      </Pressable>
-      <Pressable w="70" cursor="pointer" bg="red.500" justifyContent="center" onPress={() => deleteRow(rowMap, data.item.key)} _pressed={{
-      opacity: 0.5
-    }}>
-        <VStack alignItems="center" space={2}>
-          <Icon as={<MaterialIcons name="delete" />} color="white" size="xs" />
-          <Text color="white" fontSize="xs" fontWeight="medium">
-            Delete
-          </Text>
-        </VStack>
-      </Pressable>
-  </HStack>;
-    
-    const onScroll = (event) => {
-      console.log(`offset : ${event.nativeEvent.contentOffset.y}`);
-      if (event.nativeEvent.contentOffset.y === -100) { 
-        console.log(`refresh`);
+    const renderHiddenItem = (data, rowMap) => (
+      <HStack flex="1" pl="2">
+        <Pressable
+          w="70"
+          ml="auto" 
+          cursor="pointer"
+          bg="red.500"
+          justifyContent="center"
+          // onPress={() => deleteRow(data.item)}
+          _pressed={{ opacity: 0.5 }}
+        >
+          <VStack alignItems="center" space={2}>
+            <Icon as={<MaterialIcons name="delete" />} color="white" size="xs" />
+            <Text color="white" fontSize="xs" fontWeight="medium">
+              Delete
+            </Text>
+          </VStack>
+        </Pressable>
+      </HStack>
+    )
+
+    const onRowDidOpen = (itemKey) => {
+      Alert.alert(
+        "해당 재생목록을 삭제하겠습니까?",
+        '',
+        [
+          {
+            text: "예",
+            onPress: () => {
+              deletePlayList(itemKey);
+            }
+          },
+          {
+            text:"아니오",
+          }
+        ],
+        { cancelable : false }
+      )
+    }
+
+    const deletePlayList = (itemKey) => {
+      const audioId = playList[itemKey].audio.id;
+
+      if(audioId) {
+        const api = new Api();
+        const url = "/playList";
+        const params = {
+          "audioId" : audioId
+        }
+
+        api.doDelete(url, params)
+          .then((response) => {
+            const responseData = response.data;
+            
+            if(responseData.result === apiResponse.SUCCESS) {
+              getPlayList();
+            }
+          })
+          .catch((error) => {
+            console.log(`[PlayList.js] Get PlayList Failed : ${error}`);
+            Alert.alert("재생목록 삭제에 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
+          });
       }
-    };
-
+    }
+    
     return (
         <View style={styles.container}>
-
-          <Box bg="#000000" safeArea flex="1">
+          <Box bg="#000000"  flex="0">
             <SwipeListView
               data={listData}
               renderItem={renderItem}
+              renderRow={renderItem}
               renderHiddenItem={renderHiddenItem}
               previewRowKey={'0'}
               previewOpenValue={-40}
               previewOpenDelay={3000}
-              onRowDidOpen={onRowDidOpen}
+              onRowClose={onRowDidOpen}
+              onRowOpen={onRowDidOpen}
               initialNumToRender={10}
-              // onEndReached={onEndReached}
-              // onEndReachedThreshold={0.5}
-              //onScroll={onScroll}
             />
           </Box>
           <MediaPlayer playList={listData} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>
@@ -177,7 +189,6 @@ const styles = StyleSheet.create({
     searchContainer: {
       width: "100%",
       alignItems: 'center',
-      // marginBottom: 10,
       marginTop: 40,
     },
 });

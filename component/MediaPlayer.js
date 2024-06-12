@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
 
 
 const MediaPlayer = ({ playList, currentIdx }) => {
     const playbackState = usePlaybackState();
     const { position, duration } = useProgress();
+
     const [title, setTitle] = useState('');
+    const [isSinglePlayMode, setSinglePlayMode] = useState(false);
 
     // Start useEffect Logic
     useEffect(() => {
@@ -80,6 +82,16 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         await updateTitle();
     };
 
+    const handlePlaySingleTrack = async () => {
+        if(isSinglePlayMode) {
+            await TrackPlayer.setRepeatMode(RepeatMode.Queue);
+            setSinglePlayMode(false);
+        } else {
+            await TrackPlayer.setRepeatMode(RepeatMode.Track);
+            setSinglePlayMode(true);
+        }
+    }
+
     const formatTime = (millis) => {
         const minutes = Math.floor(millis / 60000);
         const seconds = ((millis % 60000) / 1000).toFixed(0);
@@ -122,6 +134,9 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                 <Text style={styles.time}>{formatTime(duration * 1000)}</Text>
             </View>
             <View style={styles.controls}>
+                <TouchableOpacity >
+                    <Ionicons name="shuffle" size={32} color="gray" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayPrevious}>
                     <Ionicons name="play-skip-back" size={32} color="white" />
                 </TouchableOpacity>
@@ -130,6 +145,14 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayNext}>
                     <Ionicons name="play-skip-forward" size={32} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handlePlaySingleTrack}>
+                    { isSinglePlayMode ? 
+                        (<Ionicons name="repeat" size={32} color="white"/>) 
+                        : 
+                        (<Ionicons name="repeat" size={32} color="gray"/>)
+                    }
+
                 </TouchableOpacity>
             </View>
         </View>
@@ -148,14 +171,14 @@ const styles = StyleSheet.create({
     },
     title: {
         color: 'white',
-        fontSize: 13,
+        fontSize: 15,
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 5,
     },
     slider: {
         width: '100%',
-        height: 20,
+        height: 10,
     },
     timeContainer: {
         flexDirection: 'row',

@@ -14,7 +14,7 @@
     "@react-navigation/native-stack": "^6.9.26",
     "axios": "^1.6.8",
     "expo": "^51.0.9",
-    "expo-av": "~14.0.5",
+    "expo-dev-client": "~4.0.15",
     "expo-secure-store": "~13.0.1",
     "expo-status-bar": "~1.12.1",
     "he": "^1.2.0",
@@ -26,8 +26,7 @@
     "react-native-screens": "3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-swipe-list-view": "^3.2.9",
-    "react-native-track-player": "^4.1.1",
-    "expo-dev-client": "~4.0.15"
+    "react-native-track-player": "^4.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

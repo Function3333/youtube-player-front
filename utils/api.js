@@ -58,6 +58,27 @@ class Api {
   
       return axios.get(requestUrl, config);
     }
+
+    async doDelete(url, params) {
+      await this.setHeader();
+      
+      const requestUrl = `http://${this.host}:${this.port}${url}`;
+      console.log(`Request URL: ${requestUrl}`);
+      console.log(`Request Params: ${JSON.stringify(params)}`);
+  
+      const config = {
+        params: params,
+      };
+  
+      if(this.accessTokenHeader != null && this.refreshTokenHeader != null) {
+        config.headers = {
+          "ACCESS_TOKEN": this.accessTokenHeader,
+          "REFRESH_TOKEN": this.refreshTokenHeader,
+        };
+      }
+  
+      return axios.delete(requestUrl, config);
+    }
 }
 
 export default Api;

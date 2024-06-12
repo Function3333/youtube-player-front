@@ -36,6 +36,8 @@ const PlayList = () => {
           console.log(`[PlayList.js] Get PlayList Failed : ${error}`);
           Alert.alert("재생목록을 가져오는데 실패하였습니다.", "잠시 후 다시 시도 해 주세요");
         });
+
+        console.log(`[PlayList] playlist : ${JSON.stringify(playList)}`);
     }
 
     useEffect(() => {
@@ -161,11 +163,11 @@ const PlayList = () => {
               renderRow={renderItem}
               renderHiddenItem={renderHiddenItem}
               previewRowKey={'0'}
-              previewOpenValue={-40}
+              previewOpenValue={50}
               previewOpenDelay={3000}
               onRowClose={onRowDidOpen}
-              onRowOpen={onRowDidOpen}
               initialNumToRender={10}
+              disableRightSwipe={true}
             />
           </Box>
           <MediaPlayer playList={listData} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx}/>

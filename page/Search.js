@@ -183,8 +183,6 @@ const Search = ({navigation}) => {
 
     return (
         <View style={styles.container}>
-
-          {/* Start SearchBar */}
           <View style={styles.searchContainer}>
             <Input
               style={styles.inputText} 
@@ -201,33 +199,20 @@ const Search = ({navigation}) => {
                 <Icon ml="2" size="4" color="gray.400" as={<Ionicons name="search" />} />
               }
             />
-
-            <SwipeListView
-              style={styles.test}
-              data={listData}
-              renderItem={renderItem}
-              previewRowKey={'0'}
-              previewOpenValue={-40}
-              previewOpenDelay={3000}
-              onRowDidOpen={onRowDidOpen}
-              initialNumToRender={10}
-              onEndReached={onEndReached}
-            />
+            <Box bg="#000000"  flex="0">
+              <SwipeListView
+                data={listData}
+                renderItem={renderItem}
+                rightOpenValue={-130}
+                previewRowKey={'0'}
+                previewOpenValue={-40}
+                previewOpenDelay={3000}
+                onRowDidOpen={onRowDidOpen}
+                initialNumToRender={10}
+                onEndReached={onEndReached}
+              />
+            </Box>
           </View>
-          
-          {/* <Box bg="#000000" safeArea flex="1">
-            <SwipeListView
-              data={listData}
-              renderItem={renderItem}
-              rightOpenValue={-130}
-              previewRowKey={'0'}
-              previewOpenValue={-40}
-              previewOpenDelay={3000}
-              onRowDidOpen={onRowDidOpen}
-              initialNumToRender={10}
-              onEndReached={onEndReached}
-            />
-          </Box> */}
         </View>
     )
 }

@@ -1,4 +1,3 @@
-// component/MediaPlayerScreen.js
 import React, { useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
 import MediaPlayer from './MediaPlayer';
@@ -15,7 +14,7 @@ const MediaPlayerScreen = () => {
 
     return (
         <View style={styles.container}>
-            <MediaPlayer audio={audio} currentIdx={0} setCurrentIdx={() => {}} />
+            <MediaPlayer audio={audio} currentIdx={0} setCurrentIdx={() => { }} />
         </View>
     );
 };

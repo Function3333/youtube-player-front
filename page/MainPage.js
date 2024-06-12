@@ -8,28 +8,28 @@ import Search from './Search';
 import PlayList from './PlayList';
 
 const MainPage = () => {
-    const [selectPage, setSelectPage] = useState(1);
+  const [selectPage, setSelectPage] = useState(1);
 
-    return(
-        <View style={styles.container}>          
-          
-          <AppBar/>
+  return (
+    <View style={styles.container}>
 
-          {selectPage === 1 ? <Search /> : <PlayList />}
+      <AppBar />
 
-          <HStack px="1" py="3"  justifyContent="space-between">
-            <Footer setSelectPage={setSelectPage}/>
-          </HStack>
-        </View>
-    )
+      {selectPage === 1 ? <Search /> : <PlayList />}
+
+      <HStack px="1" py="3" justifyContent="space-between">
+        <Footer setSelectPage={setSelectPage} />
+      </HStack>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#000000',
-      alignItems: 'center',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
+    alignItems: 'center',
+  },
 });
 
 export default MainPage;

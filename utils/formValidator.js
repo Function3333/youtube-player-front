@@ -8,7 +8,7 @@ class FormValidator {
         const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{1,16}$/;
         return regex.test(password);
     }
-    
+
     validateUsername(username) {
         const regex = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{1,16})$/;
         return regex.test(username);

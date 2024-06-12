@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
 
 
 const MediaPlayer = ({ playList, currentIdx }) => {
@@ -17,7 +17,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         const setupPlayer = async () => {
             const formattedPlayList = playList.map(track => ({
                 id: track.id,
-                url: track.audioUrl.replace(/"$/, ''), 
+                url: track.audioUrl.replace(/"$/, ''),
                 title: track.title,
                 artist: 'Unknown',
                 artwork: track.thumbnailUrl
@@ -29,9 +29,9 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         setupPlayer();
         updateTitle();
     }, [playList]);
-    
+
     useEffect(() => {
-        if(currentIdx) {
+        if (currentIdx) {
             playTrackById(currentIdx);
         }
     }, [currentIdx]);
@@ -41,7 +41,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         try {
             await TrackPlayer.skip(parseInt(id));
             await TrackPlayer.play();
-            updateTitle();    
+            updateTitle();
         } catch (error) {
             console.log(`[MediaPlayer.js] PlayTrackById Failed`);
             console.log(error);
@@ -50,12 +50,12 @@ const MediaPlayer = ({ playList, currentIdx }) => {
 
     const updateTitle = async () => {
         const activeTrackIdx = parseInt(await TrackPlayer.getActiveTrackIndex());
-        
+
         let track = null;
-        if(!isNaN(activeTrackIdx)) {
-            track =  await TrackPlayer.getTrack(activeTrackIdx);
-        }else {
-            track =  await TrackPlayer.getTrack(0);
+        if (!isNaN(activeTrackIdx)) {
+            track = await TrackPlayer.getTrack(activeTrackIdx);
+        } else {
+            track = await TrackPlayer.getTrack(0);
         }
 
         setTitle(track.title);
@@ -83,7 +83,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
     };
 
     const handlePlaySingleTrack = async () => {
-        if(isSinglePlayMode) {
+        if (isSinglePlayMode) {
             await TrackPlayer.setRepeatMode(RepeatMode.Queue);
             setSinglePlayMode(false);
         } else {
@@ -101,16 +101,16 @@ const MediaPlayer = ({ playList, currentIdx }) => {
     useTrackPlayerEvents(["playback-track-changed"], async event => {
         if (event.type === "playback-track-changed" && event.nextTrack != null) {
             const track = await TrackPlayer.getTrack(event.nextTrack);
-            const {title} = track || {};
+            const { title } = track || {};
             setTitle(title);
         }
     });
 
-    useTrackPlayerEvents([Event.RemotePause, Event.RemotePlay ], (event) => {
+    useTrackPlayerEvents([Event.RemotePause, Event.RemotePlay], (event) => {
         if (event.type === Event.RemotePause) {
-          TrackPlayer.pause();
+            TrackPlayer.pause();
         } else if (event.type === Event.RemotePlay) {
-          TrackPlayer.play();
+            TrackPlayer.play();
         }
     });
 
@@ -147,10 +147,10 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                     <Ionicons name="play-skip-forward" size={32} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlaySingleTrack}>
-                    { isSinglePlayMode ? 
-                        (<Ionicons name="repeat" size={32} color="white"/>) 
-                        : 
-                        (<Ionicons name="repeat" size={32} color="gray"/>)
+                    {isSinglePlayMode ?
+                        (<Ionicons name="repeat" size={32} color="white" />)
+                        :
+                        (<Ionicons name="repeat" size={32} color="gray" />)
                     }
 
                 </TouchableOpacity>

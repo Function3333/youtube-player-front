@@ -4,35 +4,33 @@ import moment from "moment-timezone";
 import SecureStore from "./SecureStore";
 
 class Token {
-    
+
     constructor(acccessTokenData, refreshTokenData) {
         this.acccessTokenData = acccessTokenData;
         this.refreshTokenData = refreshTokenData;
     }
 
-    //AccessToken만 expired이면 RefreshToken으로 AccessToken을 갱신한 후 true 반환, 단 에러 발생 시 false 반환 후 로그인 페이지로 navigate
-    //둘다 expired이면 false 반환 후 로그인 페이지로 navigate
     isTokenExpired() {
         const accessTokenResult = this.isAccessTokenExpired();
         const refreshTokenResult = this.isRefreshTokenExpired();
         let result = false;
-        
-        if(accessTokenResult === true && refreshTokenResult === false) {
+
+        if (accessTokenResult === true && refreshTokenResult === false) {
             const api = new Api();
             const secureStore = new SecureStore();
             const url = "/user/accessToken";
             const params = {
-                "REFRESH_TOKEN" : this.refreshTokenData.payload
+                "REFRESH_TOKEN": this.refreshTokenData.payload
             };
 
             api.doGet(url, params)
                 .then((response) => {
                     const responseResult = response.data.result;
-                    
-                    if(responseResult === apiResponse.SUCCESS) {                        
+
+                    if (responseResult === apiResponse.SUCCESS) {
                         const accessTokenData = response.data.data;
                         const token = new Token(accessTokenData, this.refreshTokenData);
-          
+
                         secureStore.save("token", JSON.stringify(token));
                     }
                 })
@@ -42,11 +40,11 @@ class Token {
                 });
         }
 
-        if(accessTokenResult === true && refreshTokenResult === true) {
+        if (accessTokenResult === true && refreshTokenResult === true) {
             result = true;
         }
 
-        return  result;
+        return result;
     }
 
     isTokenValide() {

@@ -27,5 +27,13 @@
     "ServerError.content" : "잠시 후 다시 시도해 주세요",
 
     "SearchError.title" : "검색에 실패하였습니다.",
-    "SearchError.content" : "잠시 후 다시 시도해 주세요."
+    "SearchError.content" : "잠시 후 다시 시도해 주세요.",
+
+    "PlayList.getPlayList.fail.title" : "재생목록을 가져오는데 실패하였습니다.",
+    "PlayList.getPlayList.fail.content" : "잠시 후 다시 시도 해 주세요",
+
+    "Search.handleOnPress" : "해당 영상의 음원을 추출하시겠습니까?",
+    "Search.extractAudio.success" : "추출에 성공하였습니다.",
+    "Search.extractAudio.fail.title" : "추출에 실패하였습니다",
+    "Search.extractAudio.fail.content" : "10분 이하의 영상만 추출 가능합니다."
 }

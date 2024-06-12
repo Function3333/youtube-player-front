@@ -11,20 +11,19 @@ class SecureStore {
         return ExpoSecureStore.getItemAsync(key);
     }
 
-    async saveCurrentIdx (value) {
+    async saveCurrentIdx(value) {
         try {
-            //this.save("currentIdx", JSON.stringify(value));    
             this.save("currentIdx", value);
         } catch (error) {
             console.log(`[SecureStore.js] saveCurrentIdx() ERROR : ${error}`);
-        }    
+        }
     }
 
     async getCurrentIdx() {
         let currentAudio = null;
 
         try {
-            currentAudio = JSON.parse(await this.getValue("currentIdx"));    
+            currentAudio = JSON.parse(await this.getValue("currentIdx"));
         } catch (error) {
             console.log(`[SecureStore.js] getCurrentIdx() ERROR : ${error}`);
         }
@@ -34,7 +33,7 @@ class SecureStore {
     async getToken() {
         let token = null;
         try {
-            token = JSON.parse(await this.getValue("token"));    
+            token = JSON.parse(await this.getValue("token"));
         } catch (error) {
             console.log(`[SecureStore.js] getToken() ERROR : ${error}`);
         }
@@ -44,11 +43,11 @@ class SecureStore {
     async getNextPageToken() {
         let nextPageTokne = undefined;
         try {
-            nextPageTokne = await this.getValue("nextPageToken");    
+            nextPageTokne = await this.getValue("nextPageToken");
         } catch (error) {
             console.log(`[SecureStore.js] getNextPageToken() ERROR : ${error}`);
         }
-        
+
         return nextPageTokne;
     }
 }

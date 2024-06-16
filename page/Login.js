@@ -1,5 +1,5 @@
 import { Box, Heading, VStack, FormControl, Input, HStack, Text, Center, Button, View, Link } from 'native-base';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert, Image } from 'react-native';
 import { useState } from 'react';
 import outputMessages from '../utils/outputMessages.json'
 import Api from '../utils/Api';
@@ -60,14 +60,15 @@ const Login = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Center w="100%">
-        <Box safeArea p="2" py="8" w="90%" maxW="290">
-          <Center>
-            <Heading size="lg" fontWeight="600" color="#FAFAD2">
-              Youtube Player
-            </Heading>
-          </Center>
 
-          <VStack space={3} mt="5">
+        <Image
+          source={require('../assets/icon.png')}
+          style={[styles.logo, { width: 500, height: 200 }]}
+        />
+
+        <Box p="2" w="80%" maxW="290">
+          <VStack space={3}>
+
             <FormControl>
               <FormControl.Label>Username</FormControl.Label>
               <Input
@@ -76,6 +77,7 @@ const Login = ({ navigation }) => {
                 onChangeText={setUsername}
               />
             </FormControl>
+
             <FormControl>
               <FormControl.Label>Password</FormControl.Label>
               <Input
@@ -123,6 +125,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logo: {
+    marginBottom: 0,
   },
 });
 export default Login;

@@ -12,7 +12,6 @@ const MediaPlayer = ({ playList, currentIdx }) => {
     const [title, setTitle] = useState('');
     const [isSinglePlayMode, setSinglePlayMode] = useState(false);
 
-    // Start useEffect Logic
     useEffect(() => {
         const setupPlayer = async () => {
             const formattedPlayList = playList.map(track => ({
@@ -35,7 +34,6 @@ const MediaPlayer = ({ playList, currentIdx }) => {
             playTrackById(currentIdx);
         }
     }, [currentIdx]);
-    // End useEffect Logic
 
     const playTrackById = async (id) => {
         try {

@@ -35,7 +35,7 @@ const PlayList = () => {
       })
       .catch((error) => {
         console.log(`[PlayList.js] Get PlayList Failed : ${error}`);
-        Alert.alert(outputMessages['PlayList.getPlayList.fail.title'],outputMessages["PlayList.getPlayList.fail.content"]);
+        Alert.alert(outputMessages['PlayList.getPlayList.fail.title'], outputMessages["PlayList.getPlayList.fail.content"]);
       });
 
     console.log(`[PlayList] playlist : ${JSON.stringify(playList)}`);

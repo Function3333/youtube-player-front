@@ -231,11 +231,8 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: 'center',
     marginBottom: 50,
-    marginTop: 15,
+    // marginTop: 0,
   },
-  test: {
-    marginTop: 25
-  }
 });
 
 export default Search;

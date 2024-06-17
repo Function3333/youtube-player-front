@@ -4,7 +4,7 @@ import SecureStore from '../utils/SecureStore';
 
 class Api {
   constructor() {
-    this.host = "192.168.0.11";
+    this.host = "192.168.0.139";
     this.port = "8080";
   }
 

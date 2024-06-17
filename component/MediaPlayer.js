@@ -14,20 +14,35 @@ const MediaPlayer = ({ playList, currentIdx }) => {
 
     useEffect(() => {
         const setupPlayer = async () => {
-            const formattedPlayList = playList.map(track => ({
-                id: track.id,
-                url: track.audioUrl.replace(/"$/, ''),
-                title: track.title,
-                artist: 'Unknown',
-                artwork: track.thumbnailUrl
+            const formattedPlayList = await Promise.all(playList.map(async track => {
+               const flag = await isTrackAlreadyExist(track.id);
+               
+               if(!flag) {
+                return {
+                    id: track.id,
+                    url: track.audioUrl.replace(/"$/, ''),
+                    title: track.title,
+                    artist: 'Unknown',
+                    artwork: track.thumbnailUrl
+                }
+               }
+               return null
             }));
 
-            await TrackPlayer.add(formattedPlayList);
+            const filteredPlayList = formattedPlayList.filter( track => track !== null);
+            if(filteredPlayList.length > 0) {
+                await TrackPlayer.add(filteredPlayList);
+            }
         };
 
         setupPlayer();
         updateTitle();
     }, [playList]);
+
+    const isTrackAlreadyExist = async (trackId) => {
+        const track = await TrackPlayer.getActiveTrackIndex(trackId);
+        return track !== undefined;
+    }
 
     useEffect(() => {
         if (currentIdx) {
@@ -57,6 +72,11 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         }
 
         setTitle(track.title);
+    }
+
+    const handleShuffle = async () => {
+        const queue = await TrackPlayer.getQueue();
+        console.log(`MediaPlayer queue length : ${queue.length}`);
     }
 
     const handlePlayPrevious = async () => {
@@ -132,8 +152,8 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                 <Text style={styles.time}>{formatTime(duration * 1000)}</Text>
             </View>
             <View style={styles.controls}>
-                <TouchableOpacity >
-                    <Ionicons name="shuffle" size={32} color="gray" />
+                <TouchableOpacity onPress={handleShuffle}>
+                    <Ionicons name="shuffle" size={32} color="gray"/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayPrevious}>
                     <Ionicons name="play-skip-back" size={32} color="white" />
@@ -150,7 +170,6 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                         :
                         (<Ionicons name="repeat" size={32} color="gray" />)
                     }
-
                 </TouchableOpacity>
             </View>
         </View>

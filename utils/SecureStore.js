@@ -11,6 +11,22 @@ class SecureStore {
         return ExpoSecureStore.getItemAsync(key);
     }
 
+    async saveSearchResult(value) {
+        try {
+            this.save("searchResult", value);
+        } catch (error) {
+            console.log(`[SecureStore.js] saveSearchResult Failed : ${error}`);
+        }
+    }
+
+    async getSearchResult() {
+        try {
+            return JSON.parse(await this.getValue("searchResult"));
+        } catch (error) {
+            console.log(`[SecureStore.js] getSearchResult Failed : ${error}`);
+        }
+    }
+
     async saveCurrentIdx(value) {
         try {
             this.save("currentIdx", value);

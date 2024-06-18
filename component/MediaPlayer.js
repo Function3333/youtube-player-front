@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
-import Slider from '@react-native-community/slider';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 
 
 const MediaPlayer = ({ playList, currentIdx }) => {
@@ -11,6 +11,8 @@ const MediaPlayer = ({ playList, currentIdx }) => {
 
     const [title, setTitle] = useState('');
     const [isSinglePlayMode, setSinglePlayMode] = useState(false);
+    const [isShuffleMode, setShuffleMode] = useState(false);
+    const [playlist, setPlayList] = useState([]);
 
     useEffect(() => {
         const setupPlayer = async () => {
@@ -32,6 +34,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
             const filteredPlayList = formattedPlayList.filter( track => track !== null);
             if(filteredPlayList.length > 0) {
                 await TrackPlayer.add(filteredPlayList);
+                playlist = setPlayList(filteredPlayList);
             }
         };
 
@@ -52,7 +55,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
 
     const playTrackById = async (id) => {
         try {
-            await TrackPlayer.skip(parseInt(id));
+            await TrackPlayer.skip(parseInt(id), playlist);
             await TrackPlayer.play();
             updateTitle();
         } catch (error) {
@@ -74,15 +77,14 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         setTitle(track.title);
     }
 
-    const handleShuffle = async () => {
-        const queue = await TrackPlayer.getQueue();
-        console.log(`MediaPlayer queue length : ${queue.length}`);
-    }
-
     const handlePlayPrevious = async () => {
-        await TrackPlayer.skipToPrevious();
-        await TrackPlayer.play();
-        await updateTitle();
+        try {
+            await TrackPlayer.skipToNext();
+            await TrackPlayer.play();
+            await updateTitle();    
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const handlePlayPause = async () => {
@@ -94,10 +96,14 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         }
     };
 
-    const handlePlayNext = async () => {
-        await TrackPlayer.skipToNext();
-        await TrackPlayer.play();
-        await updateTitle();
+    const handlePlayNext = async () => { 
+        try {
+            await TrackPlayer.skipToNext();
+            await TrackPlayer.play();
+            await updateTitle();    
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const handlePlaySingleTrack = async () => {
@@ -107,6 +113,7 @@ const MediaPlayer = ({ playList, currentIdx }) => {
         } else {
             await TrackPlayer.setRepeatMode(RepeatMode.Track);
             setSinglePlayMode(true);
+            setShuffleMode(false);
         }
     }
 
@@ -121,14 +128,6 @@ const MediaPlayer = ({ playList, currentIdx }) => {
             const track = await TrackPlayer.getTrack(event.nextTrack);
             const { title } = track || {};
             setTitle(title);
-        }
-    });
-
-    useTrackPlayerEvents([Event.RemotePause, Event.RemotePlay], (event) => {
-        if (event.type === Event.RemotePause) {
-            TrackPlayer.pause();
-        } else if (event.type === Event.RemotePlay) {
-            TrackPlayer.play();
         }
     });
 
@@ -152,8 +151,12 @@ const MediaPlayer = ({ playList, currentIdx }) => {
                 <Text style={styles.time}>{formatTime(duration * 1000)}</Text>
             </View>
             <View style={styles.controls}>
-                <TouchableOpacity onPress={handleShuffle}>
-                    <Ionicons name="shuffle" size={32} color="gray"/>
+                <TouchableOpacity>
+                    {isShuffleMode ?
+                        (<Ionicons name="shuffle" size={32} color="white"/>)
+                        :
+                        (<Ionicons name="shuffle" size={32} color="gray"/>)
+                    }
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayPrevious}>
                     <Ionicons name="play-skip-back" size={32} color="white" />

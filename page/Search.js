@@ -15,8 +15,8 @@ const Search = ({ navigation }) => {
   const [searchResult, setSearchResult] = useState([]);
   const [listData, setListData] = useState([]);
 
-  //Start Render Search Result Logic
   useEffect(() => {
+    console.log(`useEffect searchREsult : ${JSON.stringify(searchResult)}`);
     const formattedData = searchResult.map((item, index) => ({
       key: index.toString(),
       id: item.id.videoId,
@@ -26,6 +26,18 @@ const Search = ({ navigation }) => {
     }));
     setListData(formattedData);
   }, [searchResult]);
+
+  useEffect(() => {
+    const initSavedSearchResult = async () => {
+      const secureStore = new SecureStore();
+
+      const savedSearchResult = await secureStore.getSearchResult();
+      
+      setSearchResult(savedSearchResult);
+    }
+
+    initSavedSearchResult();
+  },[]);
 
   const onRowDidOpen = rowKey => {
     console.log('This row opened', rowKey);
@@ -64,19 +76,14 @@ const Search = ({ navigation }) => {
       </Pressable>
     </Box>
   );
-  //End Render Search Result Logic
-
-  const addResult = (newResults) => {
-    setSearchResult((prevResults) => [...prevResults, ...newResults]);
-  };
 
   const onEndReached = async () => {
     const api = new Api();
     const secureStore = new SecureStore();
     const nextPageToken = await secureStore.getNextPageToken();
 
-    console.log(`[Search.js] Next Page Token : ${nextPageToken}`);
-    if (searchKeyword !== undefined && nextPageToken !== undefined) {
+    console.log(`searchKeyword : ${searchKeyword}`);
+    if ((searchKeyword !== undefined) && (searchKeyword.length > 0) && (nextPageToken !== undefined)) {
       const url = "/youtubeSearchList";
       const params = {
         "keyword": searchKeyword,
@@ -84,11 +91,18 @@ const Search = ({ navigation }) => {
       }
 
       api.doGet(url, params)
-        .then((response) => {
+        .then(async (response) => {
           const responseData = JSON.parse(response.data.data);
 
-          if (responseData !== undefined) {
-            addResult(responseData.items);
+          const savedSearchResult = await secureStore.getSearchResult();
+
+          if(savedSearchResult) {
+            await secureStore.saveSearchResult(JSON.stringify(addSearhResult(savedSearchResult, responseData.item)));
+          } else {
+            if(responseData) {
+              console.log(`responseData : ${JSON.stringify(responseData)}`)
+              addResult(responseData.items);
+            }
           }
 
           if (responseData.nextPageToken !== undefined) {
@@ -101,6 +115,14 @@ const Search = ({ navigation }) => {
         });
     }
   };
+
+  const addResult = (newResults) => {
+    setSearchResult((prevResults) => [...prevResults, ...newResults]);
+  };
+
+  const addSearhResult = (previousResult, newResult) => {
+    return [...previousResult, ...newResult];
+  }
 
   const handleSearch = async () => {
     const api = new Api();
@@ -115,11 +137,14 @@ const Search = ({ navigation }) => {
       api.doGet(url, params).then(async (response) => {
         const responseData = JSON.parse(response.data.data);
 
-        if (responseData !== undefined) {
+        if (responseData) {
+          if(responseData.error) throw new Error("Search Failed");
+          
           setSearchResult(responseData.items);
+          await secureStore.saveSearchResult(JSON.stringify(responseData.items));
         }
 
-        if (responseData.nextPageToken !== undefined) {
+        if (responseData.nextPageToken) {
           secureStore.save("nextPageToken", responseData.nextPageToken);
         }
       }).catch((error) => {

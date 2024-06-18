@@ -3,13 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LogBox } from 'react-native';
+import TrackPlayer from 'react-native-track-player';
+
 import Login from './page/Login'
 import SignUp from './page/SignUp';
 import VerifyEmail from './page/VerifyEmail';
 import Search from './page/Search';
 import PlayList from './page/PlayList';
 import MainPage from './page/MainPage';
-import TrackPlayer from 'react-native-track-player';
 
 
 const Stack = createNativeStackNavigator();
@@ -23,6 +24,7 @@ export default function App() {
     const setupPlayer = async () => {
       await TrackPlayer.setupPlayer({});
 
+      TrackPlayer.registerPlaybackService(() => require('./component/playBack'));
       TrackPlayer.updateOptions({
         stopWithApp: true,
         capabilities: [
@@ -45,7 +47,6 @@ export default function App() {
           TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
         ],
       })
-      TrackPlayer.registerPlaybackService(() => require('./component/service.js'));
     }
 
     setupPlayer();

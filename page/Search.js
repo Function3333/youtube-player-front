@@ -15,16 +15,19 @@ const Search = ({ navigation }) => {
   const [searchResult, setSearchResult] = useState([]);
   const [listData, setListData] = useState([]);
 
-  useEffect(() => {
-    console.log(`useEffect searchREsult : ${JSON.stringify(searchResult)}`);
-    const formattedData = searchResult.map((item, index) => ({
-      key: index.toString(),
-      id: item.id.videoId,
-      title: he.decode(item.snippet.title),
-      channelTitle: item.snippet.channelTitle,
-      thumbnailUrl: item.snippet.thumbnails.high.url,
-    }));
-    setListData(formattedData);
+  useEffect(() => {    
+    if(searchResult) {
+      const formattedData = searchResult.map((item, index) => ({
+        key: index,
+        id: item.id,
+        title: item.title,
+        channelTitle: item.channelTitle,
+        thumbnailUrl: item.thumbnailUrl,
+        length : item.length
+      }));
+  
+      setListData(formattedData);
+    }
   }, [searchResult]);
 
   useEffect(() => {
@@ -68,6 +71,10 @@ const Search = ({ navigation }) => {
               </Text>
               <Text color="white" _dark={{ color: 'warmGray.200' }}>
                 {item.channelTitle}
+              </Text>
+
+              <Text color="white" _dark={{ color: 'warmGray.200' }} style={{ fontSize: 12 }}>
+                {item.length}
               </Text>
             </VStack>
             <Spacer />
@@ -126,7 +133,6 @@ const Search = ({ navigation }) => {
 
   const handleSearch = async () => {
     const api = new Api();
-    const secureStore = new SecureStore();
 
     if (searchKeyword.length > 0) {
       const url = "/youtubeSearchList";
@@ -134,19 +140,17 @@ const Search = ({ navigation }) => {
         "keyword": searchKeyword
       }
 
-      api.doGet(url, params).then(async (response) => {
-        const responseData = JSON.parse(response.data.data);
+      api.doGet(url, params).then((response) => {
+        const responseData = response.data;
+        const responseResult = responseData.result;
+        const data = responseData.data;
 
-        if (responseData) {
-          if(responseData.error) throw new Error("Search Failed");
-          
-          setSearchResult(responseData.items);
-          await secureStore.saveSearchResult(JSON.stringify(responseData.items));
+        console.log(`Search.js responseData : ${JSON.stringify(responseData)}`);
+
+        if (responseResult && apiResponse.SUCCESS && data != undefined) {
+          setSearchResult(data);
         }
 
-        if (responseData.nextPageToken) {
-          secureStore.save("nextPageToken", responseData.nextPageToken);
-        }
       }).catch((error) => {
         Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
         console.error(`[Search.js] Get Search List Failed : ${error}`);
@@ -241,7 +245,8 @@ const Search = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   inputText: {
-    color: "white"
+    color: "white",
+    fontSize: 14
   },
   container: {
     flex: 1,

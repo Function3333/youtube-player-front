@@ -3,15 +3,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LogBox } from 'react-native';
+import { Provider } from 'react-redux';
 import TrackPlayer from 'react-native-track-player';
 
+import store from './redux/store';
 import Login from './page/Login'
 import SignUp from './page/SignUp';
 import VerifyEmail from './page/VerifyEmail';
 import Search from './page/Search';
 import PlayList from './page/PlayList';
 import MainPage from './page/MainPage';
-
 
 const Stack = createNativeStackNavigator();
 const HEADER_NAME = "Y Music"
@@ -53,17 +54,19 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <NativeBaseProvider>
-        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={Login} options={{ title: HEADER_NAME }} />
-          <Stack.Screen name="SiginUp" component={SignUp} />
-          <Stack.Screen name="VerifyEmail" component={VerifyEmail} />
-          <Stack.Screen name="Search" component={Search} />
-          <Stack.Screen name="PlayList" component={PlayList} />
-          <Stack.Screen name="MainPage" component={MainPage} />
-        </Stack.Navigator>
-      </NativeBaseProvider>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <NativeBaseProvider>
+          <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={Login} options={{ title: HEADER_NAME }} />
+            <Stack.Screen name="SiginUp" component={SignUp} />
+            <Stack.Screen name="VerifyEmail" component={VerifyEmail} />
+            <Stack.Screen name="Search" component={Search} />
+            <Stack.Screen name="PlayList" component={PlayList} />
+            <Stack.Screen name="MainPage" component={MainPage} />
+          </Stack.Navigator>
+        </NativeBaseProvider>
+      </NavigationContainer>
+    </Provider>
   );
 }

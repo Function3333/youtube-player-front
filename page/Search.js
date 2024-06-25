@@ -3,17 +3,31 @@ import { Ionicons } from "@expo/vector-icons";
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { Alert, StyleSheet } from 'react-native';
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Api from '../utils/Api';
 import outputMessages from '../utils/outputMessages.json';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
-import he from 'he';
+import { addSearch, setNewSearch } from '../redux/searchSlice';
+import { increase, decrease, reset } from '../redux/pageIndexSlice';
 
-const Search = ({ navigation }) => {
+const Search = () => {
+  const reduxSearch = useSelector((state) => state.search);
+  const reduxPageIndex = useSelector((state) => state.pageIndex.value);
+  const dispatch = useDispatch();
+
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [listData, setListData] = useState([]);
+
+  useEffect(() => {
+    const payloads = reduxSearch.map(item => item.payload).flat();
+
+    if(payloads) {
+      setSearchResult(payloads);
+    }
+  },[]);
 
   useEffect(() => {    
     if(searchResult) {
@@ -30,25 +44,9 @@ const Search = ({ navigation }) => {
     }
   }, [searchResult]);
 
-  useEffect(() => {
-    const initSavedSearchResult = async () => {
-      const secureStore = new SecureStore();
-
-      const savedSearchResult = await secureStore.getSearchResult();
-      
-      setSearchResult(savedSearchResult);
-    }
-
-    initSavedSearchResult();
-  },[]);
-
-  const onRowDidOpen = rowKey => {
-    console.log('This row opened', rowKey);
-  };
-
   const renderItem = ({ item }) => (
     <Box>
-      <Pressable onPress={() => handleOnPress(item.id, item.title, item.thumbnailUrl)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+      <Pressable onPress={() => handleOnPress(item.id, item.title, item.channelTitle,item.thumbnailUrl, item.length)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
         <Box pl="5" pr="5" py="2.5">
           <HStack alignItems="center" space={4}>
             <Image
@@ -62,10 +60,10 @@ const Search = ({ navigation }) => {
                 color="white"
                 _dark={{ color: 'warmGray.50' }}
                 bold
-                width="280px" // 텍스트 컴포넌트의 최대 너비 설정
-                flexWrap="wrap" // 너비를 넘어갈 경우 줄 바꿈
-                numberOfLines={2} // 최대 한 줄만 표시
-                ellipsizeMode="tail" // 텍스트가 넘칠 경우 ...으로 표시
+                width="280px" 
+                flexWrap="wrap" 
+                numberOfLines={2} 
+                ellipsizeMode="tail" 
               >
                 {item.title}
               </Text>
@@ -89,7 +87,6 @@ const Search = ({ navigation }) => {
     const secureStore = new SecureStore();
     const nextPageToken = await secureStore.getNextPageToken();
 
-    console.log(`searchKeyword : ${searchKeyword}`);
     if ((searchKeyword !== undefined) && (searchKeyword.length > 0) && (nextPageToken !== undefined)) {
       const url = "/youtubeSearchList";
       const params = {
@@ -107,7 +104,6 @@ const Search = ({ navigation }) => {
             await secureStore.saveSearchResult(JSON.stringify(addSearhResult(savedSearchResult, responseData.item)));
           } else {
             if(responseData) {
-              console.log(`responseData : ${JSON.stringify(responseData)}`)
               addResult(responseData.items);
             }
           }
@@ -145,10 +141,9 @@ const Search = ({ navigation }) => {
         const responseResult = responseData.result;
         const data = responseData.data;
 
-        console.log(`Search.js responseData : ${JSON.stringify(responseData)}`);
-
-        if (responseResult && apiResponse.SUCCESS && data != undefined) {
+        if ((responseResult === apiResponse.SUCCESS) && data) {
           setSearchResult(data);
+          dispatch(addSearch(data));
         }
 
       }).catch((error) => {
@@ -158,16 +153,16 @@ const Search = ({ navigation }) => {
     }
   }
 
-  const extractAudioRequest = (id, title, thumbnailUrl) => {
-    console.log(`[Search.js] extractAudioRequest param :  ${id}, ${title}, ${thumbnailUrl}`);
-
-    if (id !== undefined && title !== undefined && thumbnailUrl !== undefined) {
+  const extractAudioRequest = (id, title, channelTitle, thumbnailUrl, length) => {
+    if (id && title && channelTitle && thumbnailUrl && length) {
       const api = new Api();
       const url = "/audio";
       const params = {
-        "videoId": id,
+        "id": id,
         "title": title,
-        "thumbnailUrl": thumbnailUrl
+        "channelTitle" : channelTitle,
+        "thumbnailUrl": thumbnailUrl,
+        "length" : length
       };
 
       api.doPost(url, params)
@@ -188,7 +183,7 @@ const Search = ({ navigation }) => {
     }
   }
 
-  const handleOnPress = (id, title, thumbnailUrl) => {
+  const handleOnPress = (id, title, channelTitle, thumbnailUrl, length) => {
     Alert.alert(
       outputMessages['Search.handleOnPress'],
       '',
@@ -196,7 +191,7 @@ const Search = ({ navigation }) => {
         {
           text: "예",
           onPress: () => {
-            extractAudioRequest(id, title, thumbnailUrl);
+            extractAudioRequest(id, title, channelTitle, thumbnailUrl, length);
           }
         },
         {
@@ -233,7 +228,6 @@ const Search = ({ navigation }) => {
             previewRowKey={'0'}
             previewOpenValue={-40}
             previewOpenDelay={3000}
-            onRowDidOpen={onRowDidOpen}
             initialNumToRender={10}
             onEndReached={onEndReached}
           />

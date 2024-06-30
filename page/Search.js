@@ -1,31 +1,43 @@
 import { View, Input, HStack, VStack, Icon, Box, Text, Pressable, Image, Spacer } from 'native-base';
 import { Ionicons } from "@expo/vector-icons";
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { Alert, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+
+import { addSearch, setNewSearch } from '../redux/searchSlice';
+import { increaseSearchIndex, decreaseSearchIndex, resetSearchIndex, setKeyword } from '../redux/searchInfoSlice';
 import Api from '../utils/Api';
 import outputMessages from '../utils/outputMessages.json';
 import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
-import { addSearch, setNewSearch } from '../redux/searchSlice';
-import { increase, decrease, reset } from '../redux/pageIndexSlice';
+
 
 const Search = () => {
   const reduxSearch = useSelector((state) => state.search);
-  const reduxPageIndex = useSelector((state) => state.pageIndex.value);
-  const dispatch = useDispatch();
+  const storedSearchIdx = useSelector((state) => state.searchInfo.searchIdx);
+  const storedSearchKeyword = useSelector((state) => state.searchInfo.keyword);
 
-  const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [listData, setListData] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchIdx, setSearchIdx] = useState(0);
+  
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const payloads = reduxSearch.map(item => item.payload).flat();
+    if(reduxSearch) {
+      setSearchResult(reduxSearch);
+    }
 
-    if(payloads) {
-      setSearchResult(payloads);
+    if(storedSearchKeyword) {
+      setSearchKeyword(storedSearchKeyword);
+    }
+
+    if(storedSearchIdx) {
+      setSearchIdx(storedSearchIdx);
     }
   },[]);
 
@@ -84,56 +96,50 @@ const Search = () => {
 
   const onEndReached = async () => {
     const api = new Api();
-    const secureStore = new SecureStore();
-    const nextPageToken = await secureStore.getNextPageToken();
 
-    if ((searchKeyword !== undefined) && (searchKeyword.length > 0) && (nextPageToken !== undefined)) {
+    dispatch(increaseSearchIndex());
+
+    if (storedSearchKeyword && storedSearchIdx) {
+      setLoading(true);
+
       const url = "/youtubeSearchList";
       const params = {
-        "keyword": searchKeyword,
-        "nextPageToken": nextPageToken
+        "keyword": storedSearchKeyword,
+        "searchIdx": storedSearchIdx
       }
 
       api.doGet(url, params)
         .then(async (response) => {
-          const responseData = JSON.parse(response.data.data);
-
-          const savedSearchResult = await secureStore.getSearchResult();
-
-          if(savedSearchResult) {
-            await secureStore.saveSearchResult(JSON.stringify(addSearhResult(savedSearchResult, responseData.item)));
-          } else {
-            if(responseData) {
-              addResult(responseData.items);
-            }
-          }
-
-          if (responseData.nextPageToken !== undefined) {
-            secureStore.save("nextPageToken", responseData.nextPageToken);
+          const responseData = response.data;
+          const responseResult = responseData.result;
+          const data = responseData.data;
+  
+          if ((responseResult === apiResponse.SUCCESS) && data) {
+            setSearchResult(data);
+            dispatch(addSearch(data));
           }
         })
         .catch((error) => {
           Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
           console.log(`[Search.js] onEndReached() Error : ${error}`);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   };
 
-  const addResult = (newResults) => {
-    setSearchResult((prevResults) => [...prevResults, ...newResults]);
-  };
-
-  const addSearhResult = (previousResult, newResult) => {
-    return [...previousResult, ...newResult];
-  }
-
   const handleSearch = async () => {
     const api = new Api();
 
+
     if (searchKeyword.length > 0) {
+      setLoading(true);
+
       const url = "/youtubeSearchList";
       const params = {
-        "keyword": searchKeyword
+        "keyword": searchKeyword,
+        "searchIdx" : 0
       }
 
       api.doGet(url, params).then((response) => {
@@ -143,13 +149,17 @@ const Search = () => {
 
         if ((responseResult === apiResponse.SUCCESS) && data) {
           setSearchResult(data);
-          dispatch(addSearch(data));
+          dispatch(setNewSearch(data));
+          dispatch(setKeyword(searchKeyword));
+          dispatch(resetSearchIndex());
         }
-
       }).catch((error) => {
         Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
         console.error(`[Search.js] Get Search List Failed : ${error}`);
-      });
+      })
+      .finally(() => {
+        setLoading(false);
+      })
     }
   }
 
@@ -206,6 +216,7 @@ const Search = () => {
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <Input
+          value={searchKeyword}
           style={styles.inputText}
           onChangeText={setSearchKeyword}
           onSubmitEditing={handleSearch}
@@ -221,16 +232,24 @@ const Search = () => {
           }
         />
         <Box bg="#000000" flex="0">
-          <SwipeListView
-            data={listData}
-            renderItem={renderItem}
-            rightOpenValue={-130}
-            previewRowKey={'0'}
-            previewOpenValue={-40}
-            previewOpenDelay={3000}
-            initialNumToRender={10}
-            onEndReached={onEndReached}
-          />
+          {isLoading ? 
+            (
+              <ActivityIndicator size="large" style={styles.activityIndicator}/>
+            )
+            :
+            ( 
+              <SwipeListView
+                data={listData}
+                renderItem={renderItem}
+                rightOpenValue={-130}
+                previewRowKey={'0'}
+                previewOpenValue={-40}
+                previewOpenDelay={3000}
+                initialNumToRender={10}
+                onEndReached={onEndReached}
+              />
+            )
+          }
         </Box>
       </View>
     </View>
@@ -256,6 +275,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 50,
     // marginTop: 0,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200, // 원하는 높이 설정
   },
 });
 

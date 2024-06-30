@@ -198,10 +198,12 @@ const SignUp = ({ navigation, route }) => {
 
             <Button
               mt="2"
-              color="#808080"
+              bg="#000000"
+              color="#000000"
               onPress={handleSignUp}
+              _text={{ color: "white", fontSize: "lg",fontWeight: "bold", fontFamily: "PlaywriteAUVIC-Regular" }}
             >
-              회원가입
+              Sign Up
             </Button>
           </VStack>
         </Box>

@@ -21,8 +21,8 @@ const AppBar = () => {
 }
 
 const styles = StyleSheet.create({
-    customFont : {
-        fontFamily : 'PlaywriteAUVIC-Regular',
+    customFont: {
+        fontFamily: 'PlaywriteAUVIC-Regular',
     },
 });
 

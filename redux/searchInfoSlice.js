@@ -1,22 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const searchInfoSlice = createSlice({
-    name : "searchInfo",
-    initialState : {
-        searchIdx : 0,
-        keyword : "",
+    name: "searchInfo",
+    initialState: {
+        searchIdx: 0,
+        keyword: "",
     },
-    reducers : {
-        increaseSearchIndex : (state) => {
+    reducers: {
+        increaseSearchIndex: (state) => {
             state.searchIdx += 1;
         },
-        decreaseSearchIndex : (state) => {
+        decreaseSearchIndex: (state) => {
             state.searchIdx -= 1;
         },
-        resetSearchIndex : (state) => {
+        resetSearchIndex: (state) => {
             state.searchIdx = 0;
         },
-        setKeyword : (state, action) => {
+        setKeyword: (state, action) => {
             state.keyword = action.payload;
         }
     }

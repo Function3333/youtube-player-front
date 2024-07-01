@@ -93,19 +93,24 @@ const Login = ({ navigation }) => {
               bg="#000000"
               color="#000000"
               onPress={handleSignIn}
-              _text={{ color: "white", fontSize: "lg",fontWeight: "bold", fontFamily: "PlaywriteAUVIC-Regular" }}
+              _text={{ color: "white", fontSize: "lg", fontWeight: "bold", fontFamily: "PlaywriteAUVIC-Regular" }}
             >
               Login In
             </Button>
-            
+
             <HStack mt="6" justifyContent="center">
 
-              <Text fontSize="sm" color="coolGray.600" _dark={{ color: "warmGray.200" }}>
-                회원이 아니신가요?.{" "}
+              <Text
+                fontFamily="PlaywriteAUVIC-Regular"
+                fontSize="sm" color="coolGray.600"
+                _dark={{ color: "warmGray.200" }}
+              >
+                {/* 회원이 아니신가요?.{" "} */}
+                Aren't you a member?.{" "}
               </Text>
 
               <Link
-                _text={{ color: "indigo.500", fontWeight: "medium", fontSize: "sm" }}
+                _text={{ color: "indigo.500", fontWeight: "medium", fontSize: "sm", fontFamily : "PlaywriteAUVIC-Regular"}}
                 onPress={() => navigation.navigate("SiginUp")}
                 to={{ screen: "SiginUp" }}
               >

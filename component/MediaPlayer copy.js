@@ -3,87 +3,64 @@ import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlaye
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import { useSelector } from 'react-redux';
 
 
-const MediaPlayer = ({ playList}) => {
+const MediaPlayer = ({ playList, currentIdx }) => {
     const playbackState = usePlaybackState();
     const { position, duration } = useProgress();
 
     const [title, setTitle] = useState('');
     const [isSinglePlayMode, setSinglePlayMode] = useState(false);
-    const [isShuffleMode, setShuffleMode] = useState(false);
-
-    const currentIdx = useSelector((state => state.trackInfo.currentIdx));
+    const [mediaPlayList, setMediaPlayList] = useState(playList);
 
     useEffect(() => {
         const setupPlayer = async () => {
-            const formattedPlayList = await Promise.all(playList.map(async track => {
-                const flag = await isTrackAlreadyExist(track.id);
-
-                if (!flag) {
-                    return {
-                        id: track.id,
-                        url: track.audioUrl.replace(/"$/, ''),
-                        title: track.title,
-                        artist: 'Unknown',
-                        artwork: track.thumbnailUrl
-                    }
+            const formattedPlayList = mediaPlayList.map(track => {
+                return {
+                    id: track.id,
+                    url: track.audioUrl.replace(/"$/, ''),
+                    title: track.title,
+                    artist: 'Unknown',
+                    artwork: track.thumbnailUrl
                 }
-                return null
-            }));
-
-            const filteredPlayList = formattedPlayList.filter(track => track !== null);
-            if (filteredPlayList.length > 0) {
-                await TrackPlayer.add(filteredPlayList);
-                // playlist = setPlayList(filteredPlayList);
-            }
+            });
+            console.log(`formattedPlayList : ${JSON.stringify(formattedPlayList)}`);
+            await TrackPlayer.add(formattedPlayList);
         };
-
         setupPlayer();
         updateTitle();
-    }, [playList]);
-
-    const isTrackAlreadyExist = async (trackId) => {
-        let flag = false;
-        const track = await TrackPlayer.getTrack(trackId);
-        
-        if(track) flag = true;
-
-        return flag
-    }
+    }, [mediaPlayList]);
 
     useEffect(() => {
-        console.log(`MediaPlayer currentIdx : ${currentIdx}`);
+        const playTrackById = async(id) => {
+            try {
+                await TrackPlayer.skip(parseInt(id));
+                await TrackPlayer.play();
+                updateTitle();
+            } catch (error) {
+                console.log(`[MediaPlayer.js] PlayTrackById Failed`);
+                console.log(error);
+            }
+        }
         playTrackById(currentIdx);
     }, [currentIdx]);
 
-    const playTrackById = async (id) => {
-        try {
-            const selectTrack = await TrackPlayer.getTrack(id);
-            const currentTrack = await TrackPlayer.getActiveTrack();
-
-            if(selectTrack.id !== currentTrack.id) {
-                console.log("skip!");
-                await TrackPlayer.skip(id);
-                await TrackPlayer.play();
-            }
-            
-            updateTitle();
-        } catch (error) {
-            console.log(`[MediaPlayer.js] PlayTrackById Failed`);
-            console.log(error);
-        }
-    }
-
     const updateTitle = async () => {
-        const currentTrack = await TrackPlayer.getTrack(currentIdx);
-        setTitle(currentTrack.title);
+        const activeTrackIdx = parseInt(await TrackPlayer.getActiveTrackIndex());
+
+        let track = null;
+        if (!isNaN(activeTrackIdx)) {
+            track = await TrackPlayer.getTrack(activeTrackIdx);
+        } else {
+            track = await TrackPlayer.getTrack(0);
+        }
+
+        setTitle(track.title);
     }
 
     const handlePlayPrevious = async () => {
         try {
-            await TrackPlayer.skipToPrevious();
+            await TrackPlayer.skipToNext();
             await TrackPlayer.play();
             await updateTitle();
         } catch (error) {
@@ -156,11 +133,7 @@ const MediaPlayer = ({ playList}) => {
             </View>
             <View style={styles.controls}>
                 <TouchableOpacity>
-                    {isShuffleMode ?
-                        (<Ionicons name="shuffle" size={32} color="white" />)
-                        :
-                        (<Ionicons name="shuffle" size={32} color="gray" />)
-                    }
+                    <Ionicons name="shuffle" size={32} color="gray" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlePlayPrevious}>
                     <Ionicons name="play-skip-back" size={32} color="white" />

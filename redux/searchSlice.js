@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const searchSlice = createSlice({
-    name : "search",
-    initialState : [],
-    reducers : {
-        addSearch : (state, newSearch) => {
+    name: "search",
+    initialState: [],
+    reducers: {
+        addSearch: (state, newSearch) => {
             state.push(newSearch);
         },
 
-        setNewSearch : (state, action) => {
+        setNewSearch: (state, action) => {
             return action.payload
         }
     }

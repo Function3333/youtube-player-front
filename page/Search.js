@@ -24,41 +24,41 @@ const Search = () => {
   const [isLoading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchIdx, setSearchIdx] = useState(0);
-  
+
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if(reduxSearch) {
+    if (reduxSearch) {
       setSearchResult(reduxSearch);
     }
 
-    if(storedSearchKeyword) {
+    if (storedSearchKeyword) {
       setSearchKeyword(storedSearchKeyword);
     }
 
-    if(storedSearchIdx) {
+    if (storedSearchIdx) {
       setSearchIdx(storedSearchIdx);
     }
-  },[]);
+  }, []);
 
-  useEffect(() => {    
-    if(searchResult) {
+  useEffect(() => {
+    if (searchResult) {
       const formattedData = searchResult.map((item, index) => ({
         key: index,
         id: item.id,
         title: item.title,
         channelTitle: item.channelTitle,
         thumbnailUrl: item.thumbnailUrl,
-        length : item.length
+        length: item.length
       }));
-  
+
       setListData(formattedData);
     }
   }, [searchResult]);
 
   const renderItem = ({ item }) => (
     <Box>
-      <Pressable onPress={() => handleOnPress(item.id, item.title, item.channelTitle,item.thumbnailUrl, item.length)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
+      <Pressable onPress={() => handleOnPress(item.id, item.title, item.channelTitle, item.thumbnailUrl, item.length)} _dark={{ bg: 'coolGray.800' }} _light={{ bg: '#000000' }}>
         <Box pl="5" pr="5" py="2.5">
           <HStack alignItems="center" space={4}>
             <Image
@@ -72,10 +72,10 @@ const Search = () => {
                 color="white"
                 _dark={{ color: 'warmGray.50' }}
                 bold
-                width="280px" 
-                flexWrap="wrap" 
-                numberOfLines={2} 
-                ellipsizeMode="tail" 
+                width="280px"
+                flexWrap="wrap"
+                numberOfLines={2}
+                ellipsizeMode="tail"
               >
                 {item.title}
               </Text>
@@ -113,7 +113,7 @@ const Search = () => {
           const responseData = response.data;
           const responseResult = responseData.result;
           const data = responseData.data;
-  
+
           if ((responseResult === apiResponse.SUCCESS) && data) {
             setSearchResult(data);
             dispatch(addSearch(data));
@@ -139,7 +139,7 @@ const Search = () => {
       const url = "/youtubeSearchList";
       const params = {
         "keyword": searchKeyword,
-        "searchIdx" : 0
+        "searchIdx": 0
       }
 
       api.doGet(url, params).then((response) => {
@@ -157,9 +157,9 @@ const Search = () => {
         Alert.alert(outputMessages['SearchError.title'], outputMessages['SearchError.content']);
         console.error(`[Search.js] Get Search List Failed : ${error}`);
       })
-      .finally(() => {
-        setLoading(false);
-      })
+        .finally(() => {
+          setLoading(false);
+        })
     }
   }
 
@@ -170,9 +170,9 @@ const Search = () => {
       const params = {
         "id": id,
         "title": title,
-        "channelTitle" : channelTitle,
+        "channelTitle": channelTitle,
         "thumbnailUrl": thumbnailUrl,
-        "length" : length
+        "length": length
       };
 
       api.doPost(url, params)
@@ -232,12 +232,12 @@ const Search = () => {
           }
         />
         <Box bg="#000000" flex="0">
-          {isLoading ? 
+          {isLoading ?
             (
-              <ActivityIndicator size="large" style={styles.activityIndicator}/>
+              <ActivityIndicator size="large" style={styles.activityIndicator} />
             )
             :
-            ( 
+            (
               <SwipeListView
                 data={listData}
                 renderItem={renderItem}

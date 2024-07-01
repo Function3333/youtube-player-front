@@ -8,12 +8,14 @@ import Api from '../utils/Api';
 import MediaPlayer from '../component/MediaPlayer';
 import apiResponse from '../enums/apiResponse';
 import outputMessages from '../utils/outputMessages.json'
+import { setTrackIdx} from '../redux/trackInfoSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 const PlayList = () => {
   const [playList, setPlayList] = useState([]);
   const [listData, setListData] = useState([]);
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getPlayList();
@@ -30,7 +32,7 @@ const PlayList = () => {
 
         if (responseData.result === apiResponse.SUCCESS) {
           const jsonObject = JSON.parse(responseData.data);
-          
+
           setPlayList(jsonObject);
         }
       })
@@ -42,7 +44,7 @@ const PlayList = () => {
 
   useEffect(() => {
     const formattedData = playList.map((item, index) => ({
-      key: index.toString(),
+      key: index,
       id: item.id,
       title: item.audio.youtubeTitle,
       audioUrl: item.audio.audioUrl,
@@ -85,8 +87,7 @@ const PlayList = () => {
   );
 
   const handleOnPress = (key) => {
-    console.log(`PlayList : ${key}`)
-    setCurrentIdx(key);
+    dispatch(setTrackIdx(key));
   }
 
   const renderHiddenItem = (data, rowMap) => (
@@ -170,7 +171,7 @@ const PlayList = () => {
           disableRightSwipe={true}
         />
       </Box>
-      <MediaPlayer playList={listData} currentIdx={currentIdx} setCurrentIdx={setCurrentIdx} />
+      <MediaPlayer playList={listData} />
     </View>
   )
 }

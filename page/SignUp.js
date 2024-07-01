@@ -201,7 +201,7 @@ const SignUp = ({ navigation, route }) => {
               bg="#000000"
               color="#000000"
               onPress={handleSignUp}
-              _text={{ color: "white", fontSize: "lg",fontWeight: "bold", fontFamily: "PlaywriteAUVIC-Regular" }}
+              _text={{ color: "white", fontSize: "lg", fontWeight: "bold", fontFamily: "PlaywriteAUVIC-Regular" }}
             >
               Sign Up
             </Button>

@@ -1,60 +1,74 @@
 import React, { useEffect, useState } from 'react';
-import TrackPlayer, { usePlaybackState, useProgress, State, Event, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
+import TrackPlayer, { usePlaybackState, useProgress, State, useTrackPlayerEvents, RepeatMode } from 'react-native-track-player';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { increaseTrackIdx, decreaseTrackIdx } from '../redux/trackInfoSlice';
 
 
-const MediaPlayer = ({ playList}) => {
+const MediaPlayer = ({ playList, deletedIdx }) => {
     const playbackState = usePlaybackState();
     const { position, duration } = useProgress();
+    const currentIdx = useSelector((state => state.trackInfo.currentIdx));
 
     const [title, setTitle] = useState('');
     const [isSinglePlayMode, setSinglePlayMode] = useState(false);
     const [isShuffleMode, setShuffleMode] = useState(false);
 
-    const currentIdx = useSelector((state => state.trackInfo.currentIdx));
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        const setupPlayer = async () => {
-            const formattedPlayList = await Promise.all(playList.map(async track => {
-                const flag = await isTrackAlreadyExist(track.id);
-
-                if (!flag) {
-                    return {
-                        id: track.id,
-                        url: track.audioUrl.replace(/"$/, ''),
-                        title: track.title,
-                        artist: 'Unknown',
-                        artwork: track.thumbnailUrl
-                    }
-                }
-                return null
-            }));
-
-            const filteredPlayList = formattedPlayList.filter(track => track !== null);
-            if (filteredPlayList.length > 0) {
-                await TrackPlayer.add(filteredPlayList);
-                // playlist = setPlayList(filteredPlayList);
+        const deleteTrackFromQueue = async () => {
+            if (deletedIdx !== null) {
+                await TrackPlayer.remove([deletedIdx]);
             }
-        };
+        }
 
+        deleteTrackFromQueue();
+        updateTitle();
+    }, [deletedIdx]);
+
+    useEffect(() => {
         setupPlayer();
         updateTitle();
     }, [playList]);
 
-    const isTrackAlreadyExist = async (trackId) => {
+
+    const setupPlayer = async () => {
+        const formattedPlayList = await Promise.all(playList.map(async track => {
+            const flag = await isTrackAlreadyExist(track.key);
+
+            if (!flag) {
+                return {
+                    key: track.key,
+                    id: track.id,
+                    url: track.audioUrl.replace(/"$/, ''),
+                    title: track.title,
+                    artist: 'Unknown',
+                    artwork: track.thumbnailUrl
+                }
+            }
+            return null
+        }));
+
+        const filteredPlayList = formattedPlayList.filter(track => track !== null);
+        if (filteredPlayList.length > 0) {
+            await TrackPlayer.add(filteredPlayList);
+        }
+    };
+
+
+    const isTrackAlreadyExist = async (key) => {
         let flag = false;
-        const track = await TrackPlayer.getTrack(trackId);
-        
-        if(track) flag = true;
+        const track = await TrackPlayer.getTrack(key);
+        if (track) flag = true;
 
         return flag
     }
 
     useEffect(() => {
-        console.log(`MediaPlayer currentIdx : ${currentIdx}`);
         playTrackById(currentIdx);
     }, [currentIdx]);
 
@@ -63,12 +77,11 @@ const MediaPlayer = ({ playList}) => {
             const selectTrack = await TrackPlayer.getTrack(id);
             const currentTrack = await TrackPlayer.getActiveTrack();
 
-            if(selectTrack.id !== currentTrack.id) {
-                console.log("skip!");
+            if (selectTrack.id !== currentTrack.id) {
                 await TrackPlayer.skip(id);
                 await TrackPlayer.play();
             }
-            
+
             updateTitle();
         } catch (error) {
             console.log(`[MediaPlayer.js] PlayTrackById Failed`);
@@ -83,8 +96,9 @@ const MediaPlayer = ({ playList}) => {
 
     const handlePlayPrevious = async () => {
         try {
-            await TrackPlayer.skipToPrevious();
-            await TrackPlayer.play();
+            const playListSize = (await TrackPlayer.getQueue()).length;
+            dispatch(decreaseTrackIdx(playListSize));
+
             await updateTitle();
         } catch (error) {
             console.log(error);
@@ -102,8 +116,9 @@ const MediaPlayer = ({ playList}) => {
 
     const handlePlayNext = async () => {
         try {
-            await TrackPlayer.skipToNext();
-            await TrackPlayer.play();
+            const playListSize = (await TrackPlayer.getQueue()).length;
+            dispatch(increaseTrackIdx(playListSize));
+
             await updateTitle();
         } catch (error) {
             console.log(error);
@@ -127,12 +142,11 @@ const MediaPlayer = ({ playList}) => {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
-    useTrackPlayerEvents(["playback-track-changed"], async event => {
-        if (event.type === "playback-track-changed" && event.nextTrack != null) {
-            const track = await TrackPlayer.getTrack(event.nextTrack);
-            const { title } = track || {};
-            setTitle(title);
-        }
+    useTrackPlayerEvents(["playback-queue-ended"], async () => {
+        const queue = await TrackPlayer.getQueue();
+        const playListSize = queue.length
+
+        dispatch(increaseTrackIdx(playListSize));
     });
 
     return (
@@ -144,7 +158,6 @@ const MediaPlayer = ({ playList}) => {
                 maximumValue={duration}
                 value={position}
                 minimumTrackTintColor="#FFFFFF"
-                maximumTrackTintColor="#000000"
                 thumbTintColor="#FFFFFF"
                 onSlidingComplete={async (value) => {
                     await TrackPlayer.seekTo(value);

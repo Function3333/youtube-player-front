@@ -8,13 +8,14 @@ import Api from '../utils/Api';
 import MediaPlayer from '../component/MediaPlayer';
 import apiResponse from '../enums/apiResponse';
 import outputMessages from '../utils/outputMessages.json'
-import { setTrackIdx} from '../redux/trackInfoSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { setTrackIdx } from '../redux/trackInfoSlice';
+import { useDispatch } from 'react-redux';
 
 
 const PlayList = () => {
   const [playList, setPlayList] = useState([]);
   const [listData, setListData] = useState([]);
+  const [deletedIdx, setDeletedIdx] = useState(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,8 +46,10 @@ const PlayList = () => {
   useEffect(() => {
     const formattedData = playList.map((item, index) => ({
       key: index,
-      id: item.id,
+      id: item.audio.id,
       title: item.audio.youtubeTitle,
+      channleTitle: item.audio.youtubeChannelTitle,
+      length: item.audio.length,
       audioUrl: item.audio.audioUrl,
       thumbnailUrl: item.audio.thumbnailUrl,
     }));
@@ -77,6 +80,30 @@ const PlayList = () => {
                 ellipsizeMode="tail"
               >
                 {item.title}
+              </Text>
+              <Text
+                color="white"
+                fontSize="13px"
+                _dark={{ color: 'warmGray.50' }}
+                bold
+                width="280px"
+                flexWrap="wrap"
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {item.channleTitle}
+              </Text>
+              <Text
+                color="#D3D3D3"
+                fontSize="11px"
+                _dark={{ color: 'warmGray.50' }}
+                bold
+                width="280px"
+                flexWrap="wrap"
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {item.length}
               </Text>
             </VStack>
             <Spacer />
@@ -131,7 +158,7 @@ const PlayList = () => {
   }
 
   const deletePlayList = (itemKey) => {
-    const audioId = playList[itemKey].audio.id;
+    const audioId = listData[itemKey].id;
 
     if (audioId) {
       const api = new Api();
@@ -143,8 +170,8 @@ const PlayList = () => {
       api.doDelete(url, params)
         .then((response) => {
           const responseData = response.data;
-          console.log(`response Result : ${responseData.result}`);
           if (responseData.result === apiResponse.SUCCESS) {
+            setDeletedIdx(itemKey);
             getPlayList();
           }
         })
@@ -171,7 +198,7 @@ const PlayList = () => {
           disableRightSwipe={true}
         />
       </Box>
-      <MediaPlayer playList={listData} />
+      <MediaPlayer playList={listData} deletedIdx={deletedIdx} />
     </View>
   )
 }

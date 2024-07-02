@@ -7,10 +7,9 @@ import { useDispatch, useSelector } from 'react-redux';
 
 
 import { addSearch, setNewSearch } from '../redux/searchSlice';
-import { increaseSearchIndex, decreaseSearchIndex, resetSearchIndex, setKeyword } from '../redux/searchInfoSlice';
+import { increaseSearchIndex, resetSearchIndex, setKeyword } from '../redux/searchInfoSlice';
 import Api from '../utils/Api';
 import outputMessages from '../utils/outputMessages.json';
-import SecureStore from '../utils/SecureStore';
 import apiResponse from '../enums/apiResponse';
 
 
@@ -23,7 +22,7 @@ const Search = () => {
   const [listData, setListData] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchIdx, setSearchIdx] = useState(0);
+  // const [searchIdx, setSearchIdx] = useState(0);
 
   const dispatch = useDispatch();
 
@@ -36,9 +35,6 @@ const Search = () => {
       setSearchKeyword(storedSearchKeyword);
     }
 
-    if (storedSearchIdx) {
-      setSearchIdx(storedSearchIdx);
-    }
   }, []);
 
   useEffect(() => {
